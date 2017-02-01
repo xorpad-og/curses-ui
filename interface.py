@@ -25,6 +25,16 @@ screen.move(height-2,0)
 screen.clear()
 window.refresh()
 inbuf = ""
+
+
+def sendText(text):
+	window.addstr(currentline,0,text)
+	window.clrtoeol()
+	screen.move(height-2,0)
+	window.scrollback.append(text)
+	currentline += 1
+	window.refresh()
+
 while True:
 	ch = screen.getch()
 	if ch == ord('q'):
@@ -51,12 +61,15 @@ while True:
 					break
 				window.addstr(currentline,0,line)
 				window.clrtoeol()
+				screen.move(height-2,0)
 				currentline += 1
 		if currentline == 0:
 			for line in scrollback:
 				window.addstr(currentline,0,line)
 				window.clrtoeol()
+				screen.move(height-2,0)
 				currentline += 1
+				window.refresh()
 
 		window.clrtoeol()
 		screen.move(height-2,0)
