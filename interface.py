@@ -15,7 +15,6 @@ window = curses.newwin(wheight,wwidth,begin_y,begin_x)
 
 window.idlok(1)
 
-
 screen.move(height-2,0)
 screen.clear()
 window.refresh()
@@ -25,6 +24,13 @@ while True:
 	if ch == ord('q'):
 		exit(0)
 	elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
+		screen.move(0,0)
+		window.clrtoeol()
+		screen.move(height-2,0)
+		window.clrtoeol()
+		window.addstr(height-2,0," ")
+		window.clrtoeol()
+		window.refresh()
 		window.addstr(0,0,inbuf)
 		window.clrtoeol()
 		screen.move(height-2,0)
