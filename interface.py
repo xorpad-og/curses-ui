@@ -23,9 +23,16 @@ while True:
 		exit(0)
 	elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
 		window.addstr(0,0,inbuf)
+		window.clrtoeol()
 		window.refresh()
 		inbuf = ""
 		continue
+	elif ch == curses.KEY_BACKSPACE or ch == 127:
+		if len(inbuf) > 0:
+			inbuf = inbuf[:-1]
+			window.addstr(height-2,0,inbuf)
+			window.clrtoeol()
+			window.refresh()
 	else:
 		inbuf = "%s%s" % (inbuf,str(chr(ch)))
 		if len(inbuf) >= width:
