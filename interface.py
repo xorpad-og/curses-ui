@@ -7,6 +7,10 @@ curses.cbreak()
 screen.keypad(True)
 curses.curs_set(2)	
 
+scrollback = []
+commandhist = []
+currentline = 0
+
 begin_x=0
 begin_y=0
 wheight = height
@@ -33,7 +37,27 @@ while True:
 		window.addstr(height-2,0," ")
 		window.clrtoeol()
 		window.refresh()
-		window.addstr(0,0,inbuf)
+
+		scrollback.append(inbuf)
+		commandhist.append(inbuf)
+
+		window.addstr(currentline,0,inbuf)
+		currentline += 1
+		if  currentline  >=  height-3:
+			for line in range(currentline):
+				if len(scrollback) >= height-3:
+					scrollback.remove(scrollback[line])
+					currentline = 0
+					break
+				window.addstr(currentline,0,line)
+				window.clrtoeol()
+				currentline += 1
+		if currentline == 0:
+			for line in scrollback:
+				window.addstr(currentline,0,line)
+				window.clrtoeol()
+				currentline += 1
+
 		window.clrtoeol()
 		screen.move(height-2,0)
 		window.refresh()
