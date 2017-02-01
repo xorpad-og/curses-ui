@@ -33,26 +33,24 @@ while True:
 		continue
 	elif ch == curses.KEY_BACKSPACE or ch == 127 or ch == 800 or ch == 8:
 		if len(inbuf) > width:
-			#screen.clear()
 			inbuf = inbuf[:-1]
-			if len(inbuf) > width:
-				curbuf =  inbuf[-width:]
-				window.addstr(10,0,inbuf[-width:])
+			if len(inbuf) - width > 0:
+				extra= len(inbuf) - width
+				curbuf =  inbuf[:-extra]
+				window.addstr(10,0,curbuf)
 			else:
 				curbuf = inbuf
-			#window.addstr(10,0,curbuf)
-			#screen.move(height-2,len(curbuf))
 			window.addstr(height-2,0,curbuf)
 			window.clrtoeol()
 			window.refresh()
 		elif len(inbuf) > 0:
-			screen.clear()
 			inbuf = inbuf[:-1]
+			window.addstr(height-2,0,inbuf)
 			if  len(inbuf) - width > 0:
 				screen.move(height-2,len(inbuf)-width)
-			window.addstr(height-2,0,inbuf[:width])
+			else:
+				screen.move(height-2,len(inbuf))
 			window.clrtoeol()
-			screen.move(height-2,len(inbuf))
 			window.refresh()
 	else:
 		inbuf = "%s%s" % (inbuf,str(chr(ch)))
@@ -60,10 +58,9 @@ while True:
 			tempbuf = inbuf[len(inbuf) - width :]
 			window.addstr(height-2,0,tempbuf)
 			window.clrtoeol()
-			screen.move(height-2,width-1)
 			window.refresh()
+			screen.move(height-2,width-1)
 		elif len(inbuf) < width:
-
 			window.addstr(height-2,0,inbuf)
 			screen.move(height-2,len(inbuf))
 			window.clrtoeol()
