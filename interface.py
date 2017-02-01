@@ -12,9 +12,12 @@ window = curses.newwin(height-1,width-1,0,0)
 window.clrtoeol()
 
 
+window.addstr(0,0,str(width))
+window.addstr(1,0,str(width-1))
+
 cursor_position = 0
 screen.move(height-2,0)
-command_history = []
+commandhistory = []
 
 screenbuffer = []
 command_history = []
@@ -45,39 +48,55 @@ while True:
 			cursor_position = 0
 			screen.move(height-2,0)
 	elif key == curses.KEY_BACKSPACE or key == 127:
-		if cursor_postion > 0:
+		if cursor_postion > 0 :
 			inbuf = inbuf[:1]
-			if len(inbuf) >= width-1:
-				screen.move(height-2,width-1)
-			else:
-				cursor_position -= 1
-				screen.move(height-2,cursor_position)
-				window.addstr(height-2,0, inbuf)
-			if len(inbuf) >= width-1:
-				tempbuf = inbuf[len(inbuf)-width-2:]
-				window.addstr(height-2,0,tempbuf)
-			else:
-#				window.addstr(height-2,0,inbuf)	
-				padding = width - len(inbuf)-2
+			cursor_position -= 1
+			screen.move(height-2,cursor_position)
+			if len(inbuf) > 0 and len(inbuf) < width-1:
+				padding = width-1  - len(inbuf)-1
 				tempbuf = inbuf
 				for i in range(padding):
 					tempbuf = tempbuf + " "
 				window.addstr(height-2,0,tempbuf)
+				screen.move(height-2,cursor_position)
+			elif len(inbuf) > width-1:
+				tempbuf = inbuf[width-1:]
+				window.addstr(height-2,0,tempbuf)
+				screen.move(height-2,cursor_position)
+			elif len(inbuf) == widith-1:
+				window.addstr(height-2,0,inbuf)
+				padding = width-1  - len(inbuf)-1
+				window.addstr(4,0,str(len(inbuf)-1+width-1))
+				tempbuf = inbuf
+				for i in range(padding):
+					tempbuf = tempbuf + " "
+				window.addstr(height-2,0,tempbuf)
+				cursor_position -= 1
+				screen.move(height-2,cursor_position)
+			else:
+				cursor_position -= 1
+				tempbuf = inbuf
+				for i in range(padding):
+					tempbuf = tempbuf + " "
+				screen.move(height-2,cursor_position)
+				window.addstr(height-2,0, tempbuf)
 	else:
 		inbuf = "%s%s" % (inbuf, chr(key))
 		screen.move(height-2,0)
 		padding = width - len(inbuf)-2
-		tempbuf = inbuf
-		for i in range(padding):
-			tempbuf = tempbuf + " "
 		if len(inbuf) > width-1:
-			tempbuf = inbuf[len(inbuf)-width-1:]
+#			tempbuf = inbuf[width-1:]
+			window.addstr(height-2,0,inbuf[width-1:])
+			cursor_position=width-1
 			screen.move(height-2,cursor_position)
-			window.addstr(height-2,0,tempbuf)
 		else:
+			tempbuf = inbuf
+			for i in range(padding):
+				tempbuf = tempbuf + " "
 			window.addstr(height-2,0,tempbuf)
 			cursor_position += 1
-		window.refresh()
+			screen.move(height-2,cursor_position)
+	window.refresh()
 
 curses.nocbreak()
 screen.keypad(False)
