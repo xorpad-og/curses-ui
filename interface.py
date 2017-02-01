@@ -12,6 +12,8 @@ begin_y=0
 wheight = height
 wwidth = width
 window = curses.newwin(wheight,wwidth,begin_y,begin_x)
+screen.move(height-2,0)
+window.refresh()
 
 window.idlok(1)
 
