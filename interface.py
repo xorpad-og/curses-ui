@@ -25,7 +25,13 @@ screen.move(height-2,0)
 screen.clear()
 window.refresh()
 inbuf = ""
+bufposition = 0
 
+def clearScreen():
+	window.clear()
+	currentline = 0
+	scrollback = []
+	window.refresh()
 
 def sendText(text):
 	window.addstr(currentline,0,text)
@@ -35,10 +41,18 @@ def sendText(text):
 	currentline += 1
 	window.refresh()
 
+
+
 while True:
 	ch = screen.getch()
 	if ch == ord('q'):
 		exit(0)
+	elif ch == curses.KEY_LEFT or ch == 260:
+		if bufposition > 0:
+			bufposition -= 1
+	elif ch == curses.KEY_RIGHT or ch == 261:
+		if bufposition < len(inbuf):
+			bufposition += 1
 	elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
 		screen.move(0,0)
 		window.clrtoeol()
@@ -52,6 +66,7 @@ while True:
 		commandhist.append(inbuf)
 
 		window.addstr(currentline,0,inbuf)
+
 		currentline += 1
 		if  currentline  >=  height-3:
 			for line in range(currentline):
@@ -59,10 +74,14 @@ while True:
 					scrollback.remove(scrollback[line])
 					currentline = 0
 					break
-				window.addstr(currentline,0,line)
+				if bufposition != 0:
+					str1 = line[:bufposition] + str(chr(ch)) +line[bufposition:]
+				window.addstr(currentline,0,str1)
+				commandhist.append(str1)
 				window.clrtoeol()
 				screen.move(height-2,0)
 				currentline += 1
+				window.refresh()
 		if currentline == 0:
 			for line in scrollback:
 				window.addstr(currentline,0,line)
@@ -105,6 +124,7 @@ while True:
 			window.clrtoeol()
 			window.refresh()
 	else:
+		bufposition += 1
 		inbuf = "%s%s" % (inbuf,str(chr(ch)))
 		if len(inbuf) >= width:
 			tempbuf = inbuf[len(inbuf) - width :]
