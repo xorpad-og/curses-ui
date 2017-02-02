@@ -45,9 +45,17 @@ def InputLoop():
 		elif ch == curses.KEY_LEFT or ch == 260:
 			if bufposition > 0:
 				bufposition -= 1
+				if bufposition < width:
+					screen.move(height-2,bufposition)
+				else:
+					screen.move(height-2,width-bufposition)
 		elif ch == curses.KEY_RIGHT or ch == 261:
 			if bufposition < len(inbuf):
 				bufposition += 1
+				if bufposition < width:
+					screen.move(height-2,bufposition)
+				else:
+					screen.move(height-2,width)
 		elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
 			screen.move(0,0)
 			window.clrtoeol()
@@ -120,6 +128,8 @@ def InputLoop():
 				window.refresh()
 		else:
 			bufposition += 1
+			if bufposition < width:
+				screen.move(height-2,bufposition)
 			inbuf = "%s%s" % (inbuf,str(chr(ch)))
 			if len(inbuf) >= width:
 				tempbuf = inbuf[len(inbuf) - width :]
@@ -148,9 +158,8 @@ curses.curs_set(2)
 
 begin_x=0
 begin_y=0
-wheight = height
-wwidth = width
-window = curses.newwin(wheight,wwidth,begin_y,begin_x)
+window = curses.newwin(height,width,begin_y,begin_x)
+
 screen.move(height-2,0)
 window.refresh()
 
