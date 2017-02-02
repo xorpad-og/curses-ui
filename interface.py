@@ -20,13 +20,13 @@ def ScreenRefresh(uiobj):
 		uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 	else:
 		uiobj.screen.move(uiobj.height-2,uiobj.bufposition - uiobj.width)
-	uiobj.screen.refresh()
 	uiobj.window.box()
 	uiobj.window.refresh()
 	uiobj.inputwin.box()
 	uiobj.inputwin.refresh()
 	uiobj.sidebar.box()
 	uiobj.sidebar.refresh()
+	uiobj.screen.refresh()
 
 def sendText(uiobj,text):
 	lines = wordwrap(text,uiobj.width-25)
@@ -74,6 +74,7 @@ def initWindows(uiobj):
 	uiobj.inputwin = inputwin
 
 	ScreenRefresh(uiobj)
+
 def wordwrap(text,length):
 	lines = []
 	split = text.split()
@@ -124,15 +125,15 @@ def InputLoop(uiobj):
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1-uiobj.bufposition+1)
-			uiobj.bufposition -= 1
+				uiobj.bufposition -= 1
 			ScreenRefresh(uiobj)
 		elif ch == curses.KEY_RIGHT or ch == 261:
 			if uiobj.bufposition < len(uiobj.inbuf):
-				if uiobj.bufposition+1 <uiobj. width-1:
+				if uiobj.bufposition+1 <uiobj.width-1:
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
-			uiobj.bufposition += 1
+				uiobj.bufposition += 1
 			ScreenRefresh(uiobj)
 		elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
 			uiobj.screen.move(uiobj.height-2,1)
