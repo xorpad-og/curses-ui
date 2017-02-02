@@ -38,6 +38,10 @@ def sendText(uiobj,text):
 		uiobj.scrollback.append(line)
 	ScreenRefresh(uiobj)
 
+#def updateInput(uiobj):
+#	if len(inbuf) > uiobj.width-2:
+#	uiobj.inputwin.addstr(1,1,uiobj.inbuf)
+
 def initWindows(uiobj):
 	curses.noecho()
 	curses.cbreak()
@@ -75,12 +79,19 @@ def wordwrap(text,length):
 	split = text.split()
 
 	linestring = ""
+	words = 0
 	for word in split:
-		if len(linestring) + len(word) < length:
-			linestring = linestring + word
+		if len(linestring) + len(word) <= length:
+			if words > 0:
+				linestring = linestring + " " + word
+				words += 1
+			else:
+				linestring = word
+				words += 1
 		else:
 			lines.append(linestring)
 			linestring = word
+			words = 1
 	lines.append(linestring)
 	return lines
 
@@ -127,7 +138,9 @@ def InputLoop(uiobj):
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inputwin.addstr(1,1," ")
 			uiobj.inputwin.clrtoeol()
-			uiobj.scrollback.append(uiobj.inbuf)
+			lines = wordwrap(uiobj.inbuf,uiobj.width-25)
+			for line in lines:
+				uiobj.scrollback.append(line)
 			uiobj.commandhist.append(uiobj.inbuf)
 			ScreenRefresh(uiobj)
 
@@ -140,7 +153,7 @@ def InputLoop(uiobj):
 			else:
 					sendText(uiobj,uiobj.inbuf)
 
-			uiobj.screen.move(uiobj.height-2,1)#			ScreenRefresh(uiobj)
+			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inbuf = ""
 			uiobj.bufposition = 0
 			draw_main(uiobj)
