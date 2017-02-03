@@ -42,7 +42,7 @@ def initWindows(uiobj):
 	curses.noecho()
 	curses.cbreak()
 	uiobj.screen.keypad(True)
-	curses.curs_set(2)
+	curses.curs_set(1)
 
 	begin_x=0
 	begin_y=0
@@ -115,14 +115,16 @@ def InputLoop(uiobj):
 		ch = uiobj.screen.getch()
 		if ch == ord('q'):
 			exit(0)
+		elif ch == curses.KEY_RESIZE:
+			pass	#resize the window
 		elif ch == curses.KEY_LEFT or ch == 260:
 			if uiobj.bufposition > 0:
-				if uiobj.bufposition < uiobj.width-2:
+				if uiobj.bufposition+1 < uiobj.width-2:
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1-uiobj.bufposition+1)
 				uiobj.bufposition -= 1
-			ScreenRefresh(uiobj)
+				ScreenRefresh(uiobj)
 		elif ch == curses.KEY_RIGHT or ch == 261:
 			if uiobj.bufposition < len(uiobj.inbuf):
 				if uiobj.bufposition+1 <uiobj.width-1:
@@ -174,20 +176,16 @@ def InputLoop(uiobj):
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				uiobj.inputwin.clrtoeol()
-				ScreenRefresh(uiobj)
 			elif len(uiobj.inbuf) > 0:
 				uiobj.inbuf = uiobj.inbuf[:-1]
 				uiobj.inputwin.addstr(1,1,uiobj.inbuf[-uiobj.width-2:])
 				if  len(uiobj.inbuf) - uiobj.width-2 > 0:
 					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1-uiobj.width-1)
 				else:
-					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
+					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				uiobj.inputwin.clrtoeol()
-				ScreenRefresh(uiobj)
 		else:
-			if uiobj.bufposition < uiobj.width-2:
-				uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
-			if uiobj.bufposition != len(uiobj.inbuf):
+			if uiobj.bufposition < len(uiobj.inbuf):
 				if uiobj.bufposition == 0:
 					uiobj.inbuf = str(chr(ch)) + uiobj.inbuf
 					uiobj.bufposition += 1
@@ -196,16 +194,16 @@ def InputLoop(uiobj):
 					uiobj.bufposition += 1
 			else:
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
-			if len(uiobj.inbuf) >= uiobj.width:
+				uiobj.bufposition += 1
+			if len(uiobj.inbuf) >= uiobj.width-2:
 				tempbuf = uiobj.inbuf[len(uiobj.inbuf) - uiobj.width -2:]
 				uiobj.inputwin.addstr(1,1,tempbuf)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
-				ScreenRefresh(uiobj)
 			elif len(uiobj.inbuf) < uiobj.width-2:
 				uiobj.inputwin.addstr(1,1,uiobj.inbuf)
 				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)-1)
 				uiobj.inputwin.clrtoeol()
-				ScreenRefresh(uiobj)
+		ScreenRefresh(uiobj)
 
 def killCurses(uiobj):
 	curses.nocbreak()
@@ -215,5 +213,6 @@ def killCurses(uiobj):
 
 interface = InterfaceObject()
 initWindows(interface)
+ScreenRefresh(interface)
 InputLoop(interface)
 killCurses(interface)
