@@ -38,10 +38,6 @@ def sendText(uiobj,text):
 		uiobj.scrollback.append(line)
 	ScreenRefresh(uiobj)
 
-#def updateInput(uiobj):
-#	if len(inbuf) > uiobj.width-2:
-#	uiobj.inputwin.addstr(1,1,uiobj.inbuf)
-
 def initWindows(uiobj):
 	curses.noecho()
 	curses.cbreak()
@@ -189,14 +185,15 @@ def InputLoop(uiobj):
 				uiobj.inputwin.clrtoeol()
 				ScreenRefresh(uiobj)
 		else:
-			uiobj.bufposition += 1
 			if uiobj.bufposition < uiobj.width-2:
 				uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 			if uiobj.bufposition != len(uiobj.inbuf):
 				if uiobj.bufposition == 0:
-					uobj.inbuf = str(chr(ch)) + uobj.inbuf
+					uiobj.inbuf = str(chr(ch)) + uiobj.inbuf
+					uiobj.bufposition += 1
 				else:
 					uiobj.inbuf = uiobj.inbuf[:uiobj.bufposition] + str(chr(ch)) + uiobj.inbuf[uiobj.bufposition:]
+					uiobj.bufposition += 1
 			else:
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
 			if len(uiobj.inbuf) >= uiobj.width:
