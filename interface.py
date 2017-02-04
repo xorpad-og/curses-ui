@@ -88,7 +88,7 @@ def ScreenRefresh(uiobj):
 	uiobj.screen.refresh()
 
 def sendText(uiobj,text):
-	lines = wordwrap(text,uiobj.width-35)
+	lines = wordwrap(text,uiobj.width-25)
 	for line in lines:
 		uiobj.window.addstr(uiobj.currentline,1,line)
 		uiobj.currentline += 1
@@ -105,8 +105,8 @@ def initWindows(uiobj):
 
 	begin_x=0
 	begin_y=0
-	window = curses.newwin(uiobj.height-3,uiobj.width-35,0,0)
-	sidebar = curses.newwin(uiobj.height-3, 25, 0, uiobj.width-35)
+	window = curses.newwin(uiobj.height-3,uiobj.width-25,0,0)
+	sidebar = curses.newwin(uiobj.height-3, 25, 0, uiobj.width-25)
 	inputwin = curses.newwin(3,uiobj.width,uiobj.height-3,0)
 
 
@@ -196,7 +196,7 @@ def InputLoop(uiobj):
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inputwin.addstr(1,1," ")
 			uiobj.inputwin.clrtoeol()
-			lines = wordwrap(uiobj.inbuf,uiobj.width-35)
+			lines = wordwrap(uiobj.inbuf,uiobj.width-25)
 			for line in lines:
 				uiobj.scrollback.append(line)
 			uiobj.commandhist.append(uiobj.inbuf)
