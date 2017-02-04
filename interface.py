@@ -22,7 +22,6 @@ class CursesWindow(object):
 		self.loc_x = loc_x
 		self.box = box
 		self.scrollback= []
-
 		if showcursor == False:
 			self.window.leaveok(1)
 		else:
@@ -41,7 +40,7 @@ class CursesWindow(object):
 
 	def write(self,text):
 		if self.box == True:
-			lines = wordwrap(text,self.width-2)
+			lines = wordwrap(text,self.width-3)
 		else:
 			lines = wordwrap(text,self.width)
 		for line in lines:
@@ -76,9 +75,9 @@ class CursesWindow(object):
 def ScreenRefresh(uiobj):
 	if uiobj.bufposition > uiobj.width -2 and uiobj.bufposition == len(uiobj.inbuf):
 		uiobj.screen.move(uiobj.height-2,uiobj.width-1)
-	elif uiobj.bufposition > uiobj.width-2 and uiobj.bufposition <= uiobj.width -2:
+	elif uiobj.bufposition > uiobj.width-3:
 		uiobj.screen.move(uiobj.height-2,uiobj.width-1)
-	else:
+	elif uiobj.bufposition <= uiobj.width -2:
 		uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 	uiobj.window.box()
 	uiobj.window.refresh()
@@ -89,7 +88,7 @@ def ScreenRefresh(uiobj):
 	uiobj.screen.refresh()
 
 def sendText(uiobj,text):
-	lines = wordwrap(text,uiobj.width-25)
+	lines = wordwrap(text,uiobj.width-35)
 	for line in lines:
 		uiobj.window.addstr(uiobj.currentline,1,line)
 		uiobj.currentline += 1
@@ -106,8 +105,8 @@ def initWindows(uiobj):
 
 	begin_x=0
 	begin_y=0
-	window = curses.newwin(uiobj.height-3,uiobj.width-25,0,0)
-	sidebar = curses.newwin(uiobj.height-3, 25, 0, uiobj.width-25)
+	window = curses.newwin(uiobj.height-3,uiobj.width-35,0,0)
+	sidebar = curses.newwin(uiobj.height-3, 25, 0, uiobj.width-35)
 	inputwin = curses.newwin(3,uiobj.width,uiobj.height-3,0)
 
 
@@ -179,7 +178,7 @@ def InputLoop(uiobj):
 			pass	#resize the window
 		elif ch == curses.KEY_LEFT or ch == 260:
 			if uiobj.bufposition > 0:
-				if uiobj.bufposition+1 < uiobj.width-2:
+				if uiobj.bufposition+1 < uiobj.width-3:
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1-uiobj.bufposition+1)
@@ -197,7 +196,7 @@ def InputLoop(uiobj):
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inputwin.addstr(1,1," ")
 			uiobj.inputwin.clrtoeol()
-			lines = wordwrap(uiobj.inbuf,uiobj.width-25)
+			lines = wordwrap(uiobj.inbuf,uiobj.width-35)
 			for line in lines:
 				uiobj.scrollback.append(line)
 			uiobj.commandhist.append(uiobj.inbuf)
@@ -220,33 +219,35 @@ def InputLoop(uiobj):
 			continue
 
 		elif ch == curses.KEY_BACKSPACE or ch == 127 or ch == 800 or ch == 8:
-			if len(uiobj.inbuf) >= uiobj.width-2:
+			if uiobj.bufposition-1 > uiobj.width - 2:
+				uiobj.bufposition -= 1
+				uiobj.inbuf = uiobj.inbuf[:-1]
+				uiobj.inputwin.addstr(1,1,uiobj.inbuf[-uiobj.width-3:])
+			elif len(uiobj.inbuf) >= uiobj.width-3:
 				uiobj.inbuf = uiobj.inbuf[:-1]
 				uiobj.bufposition -= 1
-				if len(uiobj.inbuf)+1 < uiobj.width-2:
+				if len(uiobj.inbuf)+1 < uiobj.width-3:
 					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				if len(uiobj.inbuf) - uiobj.width -2 > 0:
-					extra= len(uiobj.inbuf) - uiobj.width-2
+					extra= len(uiobj.inbuf) - uiobj.width-3
 					curbuf =  uiobj.inbuf[:-extra]
 				else:
 					curbuf = uiobj.inbuf
-				uiobj.inputwin.addstr(1,1,curbuf[-uiobj.width-2:])
-				if len(curbuf) < uiobj.width-2:
-					uiobj.screen.move(uiobj.height-2,len(uiobj.curbuf)+1)
+				uiobj.inputwin.addstr(1,1,curbuf[-uiobj.width-3:])
+				if len(curbuf) < uiobj.width-3:
+					uiobj.screen.move(uiobj.height-2,len(curbuf)+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				uiobj.inputwin.clrtoeol()
 			elif len(uiobj.inbuf) > 0:
 				uiobj.inbuf = uiobj.inbuf[:-1]
 				uiobj.bufposition -= 1
-				uiobj.inputwin.addstr(1,1,uiobj.inbuf[-uiobj.width-2:])
-				if  len(uiobj.inbuf) - uiobj.width-2 > 0:
-#					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1-uiobj.width-1)
+				uiobj.inputwin.addstr(1,1,uiobj.inbuf[-uiobj.width-3:])
+				if  len(uiobj.inbuf) - uiobj.width-3 > 0:
 					uiobj.screen.move(uiobj.height-2,obj.width-1)
 				else:
-#					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 					uiobj.window.addstr(15,1,str(uiobj.bufposition))
 					uiobj.window.clrtoeol()
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
@@ -262,11 +263,11 @@ def InputLoop(uiobj):
 			else:
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
 				uiobj.bufposition += 1
-			if len(uiobj.inbuf) >= uiobj.width-2:
+			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
 				uiobj.inputwin.addstr(1,1,tempbuf)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
-			elif len(uiobj.inbuf) <= uiobj.width-2:
+			elif len(uiobj.inbuf) <= uiobj.width-3:
 				uiobj.inputwin.addstr(1,1,uiobj.inbuf)
 				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 				uiobj.inputwin.clrtoeol()
