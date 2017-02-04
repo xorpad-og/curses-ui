@@ -220,10 +220,10 @@ def InputLoop(uiobj):
 			continue
 
 		elif ch == curses.KEY_BACKSPACE or ch == 127 or ch == 800 or ch == 8:
-			if len(uiobj.inbuf) > uiobj.width:
+			if len(uiobj.inbuf) >= uiobj.width-2:
 				uiobj.inbuf = uiobj.inbuf[:-1]
-				bufposition -= 1
-				if len(uiobj.inbuf)+1 < uiobj.width-1:
+				uiobj.bufposition -= 1
+				if len(uiobj.inbuf)+1 < uiobj.width-2:
 					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
@@ -232,7 +232,7 @@ def InputLoop(uiobj):
 					curbuf =  uiobj.inbuf[:-extra]
 				else:
 					curbuf = uiobj.inbuf
-				uiobj.inputwin.addstr(1,1,curbuf[-width-2:])
+				uiobj.inputwin.addstr(1,1,curbuf[-uiobj.width-2:])
 				if len(curbuf) < uiobj.width-2:
 					uiobj.screen.move(uiobj.height-2,len(uiobj.curbuf)+1)
 				else:
@@ -243,8 +243,12 @@ def InputLoop(uiobj):
 				uiobj.bufposition -= 1
 				uiobj.inputwin.addstr(1,1,uiobj.inbuf[-uiobj.width-2:])
 				if  len(uiobj.inbuf) - uiobj.width-2 > 0:
-					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1-uiobj.width-1)
+#					uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1-uiobj.width-1)
+					uiobj.screen.move(uiobj.height-2,obj.width-1)
 				else:
+#					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
+					uiobj.window.addstr(15,1,str(uiobj.bufposition))
+					uiobj.window.clrtoeol()
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				uiobj.inputwin.clrtoeol()
 		else:
@@ -259,12 +263,7 @@ def InputLoop(uiobj):
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
 				uiobj.bufposition += 1
 			if len(uiobj.inbuf) >= uiobj.width-2:
-#				tempbuf = uiobj.inbuf[len(uiobj.inbuf) - uiobj.width -2:]
-#				tempbuf = uiobj.inbuf[:uiobj.width -2 - len(uiobj.inbuf)]
-#				tempbuf = uiobj.inbuf[uiobj.width -2 - len(uiobj.inbuf):]
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
-				sendText(uiobj,str(len(tempbuf)))
-				sendText(uiobj,str(uiobj.width-2))
 				uiobj.inputwin.addstr(1,1,tempbuf)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 			elif len(uiobj.inbuf) <= uiobj.width-2:
