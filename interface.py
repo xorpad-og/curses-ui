@@ -45,9 +45,9 @@ class CursesWindow(object):
 		self.window.refresh()
 		self.uiobj.screen.refresh()
 
-	def resize(self,height,length):
-		self.window.resize(height,length)
-		self.height = hieght
+	def resize(self,height,width):
+		self.window.resize(height,width)
+		self.height = height
 		self.width = width
 		if self.box == True:
 			bufferlen = height-2
@@ -59,7 +59,7 @@ class CursesWindow(object):
 			self.scrollbacknosplit = self.scrollbacknosplit[-bufferlen:]
 		self.scrollback = []
 		if len(self.scrollbacknosplit) > 0:
-			for line in scrollbacknosplit:
+			for line in self.scrollbacknosplit:
 				lines = wordwrap(line,width-startx-startx)
 				for curline in lines:
 					self.scrollback.append(curline)
@@ -179,8 +179,6 @@ def InputLoop(uiobj):
 	uiobj.inbuf = ""
 	while True:
 		ch = uiobj.screen.getch()
-#		if ch == ord('q'):
-#			exit(0)
 		if ch == curses.KEY_RESIZE:
 			pass	#resize the window
 		elif ch == curses.KEY_LEFT or ch == 260:
