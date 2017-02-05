@@ -171,18 +171,14 @@ def InputLoop(uiobj):
 		if ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
 				continue
-			elif uiobj.commandpointer <= len(uiobj.commandhist)-1 and uiobj.commandpointer > -1:
+			elif uiobj.commandpointer < len(uiobj.commandhist)-1:
+				uiobj.commandpointer += 1
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
-				uiobj.commandpointer += 1
-			elif uiobj.commandpointer == len(uiobj.commandhist):
+			elif uiobj.commandpointer >= len(uiobj.commandhist)-1:
 				uiobj.inbuf = ""
 				uiobj.bufposition = 0
 				uiobj.commandpointer = -2
-			else:
-				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
-				uiobj.bufposition = len(uiobj.inbuf)
-				uiobj.commandpointer += 1
 
 			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
@@ -198,16 +194,15 @@ def InputLoop(uiobj):
 				uiobj.commandpointer = len(uiobj.commandhist)-1
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
-				uiobj.commandpointer -= 1
-			elif uiobj.commandpointer > len(uiobj.commandhist)-1:
-				uiobj.inbuf = ""
-				uiobj.bufposition = 0
-				uiobj.screen.move(uiobj.height-2,1)
-				uiobj.commandpointer = -2
-			elif uiobj.commandpointer <= len(uiobj.commandhist)-1 and uiobj.commandpointer > -1:
+				if uiobj.commandpointer > -1:
+					uiobj.commandpointer -= 1
+			elif uiobj.commandpointer < 0:
+				pass
+			elif uiobj.commandpointer < len(uiobj.commandhist)-1 and uiobj.commandpointer >= 0:# and uiobj.commandpointer > -1:
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
-				uiobj.commandpointer -= 1
+				if uiobj.commandpointer > 0:
+					uiobj.commandpointer -= 1
 			else:
 				continue
 
