@@ -20,7 +20,8 @@ class CursesWindow(object):
 		self.loc_y = loc_y
 		self.loc_x = loc_x
 		self.box = box
-		self.scrollback= []
+		self.scrollback = []
+		self.scrollbacknosplit = []
 		if showcursor == False:
 			self.window.leaveok(1)
 		else:
@@ -43,13 +44,47 @@ class CursesWindow(object):
 		self.window.resize(height,length)
 		self.height = hieght
 		self.width = width
-		#redraw the window backlog
+		if self.box == True:
+			bufferlen = height-2
+			startx = 1
+		else:
+			bufferlen = height
+			startx = 0
+		if self.keeplog == False:
+			self.scrollbacknosplit = self.scrollbacknosplit[-bufferlen:]
+		self.scrollback = []
+		if len(self.scrollbacknosplit) > 0:
+			for line in scrollbacknosplit:
+				lines = wordwrap(line,width-startx-startx)
+				for curline in lines:
+					self.scrollback.append(curline)
+
+		if self.keeplog == False:
+			self.scrollback = self.scrollback[-bufferlen:]
+
+		if len(self.scrollback) < bufferlen:
+			curline = startx
+			for line in self.scrollback:
+				self.window.addstr(curline,startx,line)
+				self.window.clrtoeol()
+				curline += 1
+			self.refresh()
+			return
+		if len(self.scrollback) >= bufferlen:
+			curline = startx
+			for line in self.scrollback[-bufferlen:]:
+				self.window.addstr(curline,startx,line)
+				self.window.clrtoeol()
+				curline += 1
+			self.refresh()
+			return
 
 	def move(self,y,x):
 		self.loc_y = y
 		self.loc_x = x
 
 	def write(self,text):
+		self.scrollbacknosplit.append(text)
 		if self.box == True:
 			lines = wordwrap(text,self.width-2)
 		else:
@@ -59,16 +94,14 @@ class CursesWindow(object):
 
 		if self.box == True:
 			bufferlen = self.height-2
-		else:
-			bufferlen = self.height
-
-		if self.box == True:
 			startx = 1
 		else:
+			bufferlen = self.height
 			startx = 0
 
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
+			self.scrollbacknosplit = self.scrollbacknosplit[-bufferlen:]
 		if len(self.scrollback) < bufferlen:
 			curline = startx
 			for line in self.scrollback:
