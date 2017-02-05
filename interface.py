@@ -11,7 +11,7 @@ def ResizeScreen(x,y):
 		if clientos == 'Windows':
 			os.system("mode {rows},{columns}".format(rows=x,columns=y))
 		elif clientos == 'Linux' or clientos == 'Darwin' or clientos.startswith('CYGWIN'):
-			sys.stdout.write("\x1b[8;{rows};{columns}t".format(rows=x,columns=y))
+			sys.stdout.write("\x1b[8;{columns};{rows}t".format(rows=x,columns=y))
 
 class InterfaceObject(object):
 	def __init__(self):
@@ -318,8 +318,8 @@ def killCurses(uiobj):
 	uiobj.screen.keypad(0)
 	curses.echo()
 	curses.endwin()
-
-interface = InterfaceObject()
-initWindows(interface)
-InputLoop(interface)
-killCurses(interface)
+ResizeScreen(100,20)
+#interface = InterfaceObject()
+#initWindows(interface)
+#InputLoop(interface)
+#killCurses(interface)
