@@ -66,6 +66,7 @@ class CursesWindow(object):
 			startx = 1
 		else:
 			startx = 0
+
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
 		if len(self.scrollback) < bufferlen:
@@ -80,7 +81,7 @@ class CursesWindow(object):
 			curline = startx
 			for line in self.scrollback[-bufferlen:]:
 				self.window.addstr(curline,startx,line)
-				self.window.clrtoeol
+				self.window.clrtoeol()
 				curline += 1
 			self.refresh()
 			return
@@ -157,11 +158,13 @@ def InputLoop(uiobj):
 				uiobj.bufposition += 1
 		elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
 			uiobj.mainwindow.write(uiobj.inbuf)
-
+			uiobj.inputwin.write(" ")
+			uiobj.inputwin.window.clrtoeol()
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inbuf = ""
 			uiobj.bufposition = 0
 			uiobj.mainwindow.refresh()
+			uiobj.inputwin.refresh()
 			continue
 
 		elif ch == curses.KEY_BACKSPACE or ch == 127 or ch == 800 or ch == 8:
@@ -211,11 +214,10 @@ def InputLoop(uiobj):
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
 				uiobj.inputwin.write(tempbuf)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
-			elif len(uiobj.inbuf) < uiobj.width-3:
+			else:
 				uiobj.inputwin.write(uiobj.inbuf)
-				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 				uiobj.inputwin.window.clrtoeol()
-#		Screenrefresh()
+				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 
 def killCurses(uiobj):
 	curses.nocbreak()
@@ -225,6 +227,5 @@ def killCurses(uiobj):
 
 interface = InterfaceObject()
 initWindows(interface)
-#ScreenRefresh(interface)
 InputLoop(interface)
 killCurses(interface)
