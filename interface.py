@@ -4,7 +4,6 @@ import platform
 import os
 import sys
 
-#shutil.get_terminal_size()
 
 def ResizeScreen(x,y):
 		clientos = platform.system()
@@ -26,13 +25,14 @@ class InterfaceObject(object):
 		self.commandpointer = -2
 
 class CursesWindow(object):
-	def __init__(self,uiobj,height,width,loc_y,loc_x,box=True,keeplog=False,loglength=0,showcursor=False):
+	def __init__(self,uiobj,height,width,loc_y,loc_x,minwidth,box=True,keeplog=False,loglength=0,showcursor=False):
 		self.uiobj = uiobj
 		self.window = curses.newwin(height,width,loc_y,loc_x)
 		self.height = height
 		self.width = width
 		self.loc_y = loc_y
 		self.loc_x = loc_x
+		self.minwidth = minwidth
 		self.box = box
 		self.scrollback = []
 		self.scrollbacknosplit = []
@@ -98,6 +98,7 @@ class CursesWindow(object):
 	def move(self,y,x):
 		self.loc_y = y
 		self.loc_x = x
+		self.window.mvwin(y,x)
 
 	def write(self,text):
 		self.scrollbacknosplit.append(text)
@@ -147,9 +148,9 @@ def initWindows(uiobj):
 	curses.curs_set(1)
 
 	height,width= uiobj.screen.getmaxyx()
-	uiobj.mainwindow = CursesWindow(uiobj,height-3,width-25,0,0,keeplog=True,loglength=1000)
-	uiobj.sidebar = CursesWindow(uiobj,height-3,width-uiobj.mainwindow.width,0,uiobj.mainwindow.width)
-	uiobj.inputwin = CursesWindow(uiobj,3,width,uiobj.mainwindow.height,0,showcursor=True)
+	uiobj.mainwindow = CursesWindow(uiobj,height-3,width-25,0,0,35,keeplog=True,loglength=1000)
+	uiobj.sidebar = CursesWindow(uiobj,height-3,width-uiobj.mainwindow.width,0,uiobj.mainwindow.width,25)
+	uiobj.inputwin = CursesWindow(uiobj,3,width,uiobj.mainwindow.height,0,3,showcursor=True)
 
 	uiobj.mainwindow.refresh()
 	uiobj.sidebar.refresh()
@@ -179,15 +180,24 @@ def wordwrap(text,length):
 def InputLoop(uiobj):
 	uiobj.inbuf = ""
 	while True:
+		newx,newy = shutil.get_terminal_size()
 
 		ch = uiobj.screen.getch()
-		if ch == curses.KEY_RESIZE:
-			uiobj.sidebar.write("got resize")
+		if ch == curses.KEY_RESIZE or newx != uiobj.width or newy != uiobj.height:
+			if newx < uiobj.width:
+				if newx-uiobj.sidebar.minwidth >= uiobj.mainwindow.minwidth:
+					uiobj.mainwindow.resize(uiobj.mainwindow.height,newx-uiobj.sidebar.minwidth)
+					uiobj.sidebar.move(uiobj.sidebar.loc_y,newx-uiobj.sidebar.minwidth)
+					uiobj.inputwin.resize(3,newx)
+					uiobj.width = newx
+					uiobj.mainwindow.refresh()
+					uiobj.sidebar.refresh()
+					uiobj.inputwin.refresh()
 			continue
 		if ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
 				continue
-			elif uiobj.commandpointer < len(uiobj.commandhist)-1:
+			elif uiobj.commandpointer < len(uiobj.commandhist):
 				uiobj.commandpointer += 1
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
@@ -319,6 +329,10 @@ def killCurses(uiobj):
 	curses.echo()
 	curses.endwin()
 
+if "idlelib" in sys.modules:
+	print("You cannot run this program from IDLE")
+	input("Press enter to exit")
+	exit(0)
 interface = InterfaceObject()
 initWindows(interface)
 InputLoop(interface)
