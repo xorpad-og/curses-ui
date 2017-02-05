@@ -318,8 +318,8 @@ def killCurses(uiobj):
 	uiobj.screen.keypad(0)
 	curses.echo()
 	curses.endwin()
-ResizeScreen(100,20)
-#interface = InterfaceObject()
-#initWindows(interface)
-#InputLoop(interface)
-#killCurses(interface)
+
+interface = InterfaceObject()
+initWindows(interface)
+InputLoop(interface)
+killCurses(interface)
