@@ -12,7 +12,7 @@ class InterfaceObject(object):
 		self.inbuf = ""
 
 class CursesWindow(object):
-	def __init__(self,uiobj,height,width,loc_y,loc_x,box=True,keeplog=False,showcursor=False):
+	def __init__(self,uiobj,height,width,loc_y,loc_x,box=True,keeplog=False,loglength=0,showcursor=False):
 		self.uiobj = uiobj
 		self.window = curses.newwin(height,width,loc_y,loc_x)
 		self.height = height
@@ -22,11 +22,16 @@ class CursesWindow(object):
 		self.box = box
 		self.scrollback = []
 		self.scrollbacknosplit = []
+		if loglength == 0:
+			self.loglength = height
+		else:
+			self.loglength = loglength
 		if showcursor == False:
 			self.window.leaveok(1)
 		else:
 			self.window.leaveok(0)
 		if box == True:
+			self.loglength -= 2
 			self.window.box()
 		self.keeplog = keeplog
 		self.window.keypad(0)
@@ -69,15 +74,13 @@ class CursesWindow(object):
 				self.window.clrtoeol()
 				curline += 1
 			self.refresh()
-			return
-		if len(self.scrollback) >= bufferlen:
+		else:
 			curline = startx
 			for line in self.scrollback[-bufferlen:]:
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
 			self.refresh()
-			return
 
 	def move(self,y,x):
 		self.loc_y = y
@@ -102,6 +105,11 @@ class CursesWindow(object):
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
 			self.scrollbacknosplit = self.scrollbacknosplit[-bufferlen:]
+		if len(self.scrollback) > self.loglength and self.keeplog == True:
+			self.scrollback = self.scrollback[-self.loglength:]
+		if len(self.scrollbacknosplit) > self.loglength and self.keeplog==True:
+			self.scrollbacknosplit = self.scrollbacknosplit[-self.loglength:]
+
 		if len(self.scrollback) < bufferlen:
 			curline = startx
 			for line in self.scrollback:
@@ -126,7 +134,7 @@ def initWindows(uiobj):
 	curses.curs_set(1)
 
 	height,width= uiobj.screen.getmaxyx()
-	uiobj.mainwindow = CursesWindow(uiobj,height-3,width-25,0,0,keeplog=True)
+	uiobj.mainwindow = CursesWindow(uiobj,height-3,width-25,0,0,keeplog=True,loglength=1000)
 	uiobj.sidebar = CursesWindow(uiobj,height-3,width-uiobj.mainwindow.width,0,uiobj.mainwindow.width)
 	uiobj.inputwin = CursesWindow(uiobj,3,width,uiobj.mainwindow.height,0,showcursor=True)
 
@@ -171,9 +179,9 @@ def InputLoop(uiobj):
 	uiobj.inbuf = ""
 	while True:
 		ch = uiobj.screen.getch()
-		if ch == ord('q'):
-			exit(0)
-		elif ch == curses.KEY_RESIZE:
+#		if ch == ord('q'):
+#			exit(0)
+		if ch == curses.KEY_RESIZE:
 			pass	#resize the window
 		elif ch == curses.KEY_LEFT or ch == 260:
 			if uiobj.bufposition > 0:
@@ -190,6 +198,9 @@ def InputLoop(uiobj):
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				uiobj.bufposition += 1
 		elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
+			if uiobj.inbuf.lower() == "quit":
+				killCurses(uiobj)
+				exit(0)
 			uiobj.mainwindow.write(uiobj.inbuf)
 			uiobj.inputwin.write(" ")
 			uiobj.inputwin.window.clrtoeol()
