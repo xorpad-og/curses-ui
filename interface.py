@@ -10,6 +10,7 @@ class InterfaceObject(object):
 		self.inputwin = None
 		self.height,self.width=self.screen.getmaxyx()
 		self.inbuf = ""
+		self.commandpointer = -1
 
 class CursesWindow(object):
 	def __init__(self,uiobj,height,width,loc_y,loc_x,box=True,keeplog=False,loglength=0,showcursor=False):
@@ -181,6 +182,56 @@ def InputLoop(uiobj):
 		ch = uiobj.screen.getch()
 		if ch == curses.KEY_RESIZE:
 			pass	#resize the window
+		elif ch == curses.KEY_UP:
+			if uiobj.commandpointer == 0:
+				continue
+			elif uiobj.commandpointer == -1:
+				if len(uiobj.commandhist) > 0:
+					counter = len(uiobj.commandhist)-1
+					uiobj.inbuf = uiobj.commandhist[counter]
+					uiobj.bufposition = len(uiobj.inbuf)
+					uiobj.screen.move(uiobj.height-2,uiobj.bufposition)
+					counter -= 1
+				continue
+			elif uiobj.commandpointer > 0:
+				uiob.inbuf = uiobj.commandhist[counter]
+				uiobj.bufposition = len(uiobj.inbuf)
+				if len(uiobj.bufposition) <= uiobj.width -3:
+					uiobj.screen.move(uiobj.height-2,uiobj.bufposition)
+				else:
+					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
+				counter -= 1
+				if counter == 0:
+					uiobj.inbuf = ""
+					uiobj.bufposition = 0
+					uiobj.commandpointer = -1
+					uiobj.screen.move(uiobj.height-2,1)
+
+		elif ch == curses.KEY_DOWN:
+			if uiobj.commandpointer == -1:
+				continue
+			elif uiobj.commandpointer == 0:
+				uiobj.inbuf = ""
+				uiobj.bufposition = 0
+				uiobj.screen.move(uiobj.height-2,uiobj.bufposition)
+				uiobj.commandpointer = -1
+			else:
+				uibuf.inbuf = uibut.commandhist[counter]
+				uibuf.bufposition = len(uiobj.inbuf)
+				if len(uiobj.bufposition) <= uiobj.width -3:
+					uiobj.screen.move(uiobj.height-2,uiobj.bufposition)
+				else:
+					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
+				counter += 1
+			if len(uiobj.inbuf) >= uiobj.width-3:
+				tempbuf = uiobj.inbuf[-uiobj.width+2:]
+				uiobj.inputwin.write(tempbuf)
+				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
+			else:
+				uiobj.inputwin.write(uiobj.inbuf)
+				uiobj.inputwin.window.clrtoeol()
+				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
+
 		elif ch == curses.KEY_LEFT or ch == 260:
 			if uiobj.bufposition > 0:
 				if uiobj.bufposition+1 < uiobj.width-3:
@@ -199,12 +250,14 @@ def InputLoop(uiobj):
 			if uiobj.inbuf.lower() == "quit":
 				killCurses(uiobj)
 				exit(0)
+			uiobj.commandhist.append(uiobj.inbuf)
 			uiobj.mainwindow.write(uiobj.inbuf)
 			uiobj.inputwin.write(" ")
 			uiobj.inputwin.window.clrtoeol()
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inbuf = ""
 			uiobj.bufposition = 0
+			uiobj.commandpointer = -1
 			uiobj.mainwindow.refresh()
 			uiobj.inputwin.refresh()
 			continue
