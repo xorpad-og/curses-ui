@@ -1,4 +1,17 @@
 import curses
+import shutil
+import platform
+import os
+import sys
+
+#shutil.get_terminal_size()
+
+def ResizeScreen(x,y):
+		clientos = platform.system()
+		if clientos == 'Windows':
+			os.system("mode {rows},{columns}".format(rows=x,columns=y))
+		elif clientos == 'Linux' or clientos == 'Darwin' or clientos.startswith('CYGWIN'):
+			sys.stdout.write("\x1b[8;{rows};{columns}t".format(rows=x,columns=y))
 
 class InterfaceObject(object):
 	def __init__(self):
@@ -33,7 +46,6 @@ class CursesWindow(object):
 			self.window.leaveok(0)
 		if box == True:
 			self.loglength -= 2
-			self.window.box()
 		self.keeplog = keeplog
 		self.window.keypad(0)
 		self.window.idlok(False)
@@ -167,7 +179,11 @@ def wordwrap(text,length):
 def InputLoop(uiobj):
 	uiobj.inbuf = ""
 	while True:
+
 		ch = uiobj.screen.getch()
+		if ch == curses.KEY_RESIZE:
+			uiobj.sidebar.write("got resize")
+			continue
 		if ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
 				continue
