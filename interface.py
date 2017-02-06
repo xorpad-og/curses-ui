@@ -23,6 +23,7 @@ class InterfaceObject(object):
 		self.width,self.height=shutil.get_terminal_size()
 		self.inbuf = ""
 		self.commandpointer = -2
+		self.lastpointer = -2
 
 class CursesWindow(object):
 	def __init__(self,uiobj,height,width,loc_y,loc_x,minwidth,box=True,keeplog=False,loglength=0,showcursor=False):
@@ -293,22 +294,21 @@ def InputLoop(uiobj):
 							print("Good bye!")
 							exit(0)
 		elif ch == curses.KEY_DOWN:
-
 			if uiobj.commandpointer == -2:
 				continue
 			elif uiobj.commandpointer < len(uiobj.commandhist) and len(uiobj.commandhist) > 0:
-				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.commandpointer += 1
-				uiobj.bufposition = len(uiobj.inbuf)
-			elif uiobj.commandpointer >= len(uiobj.commandhist):
-				uiobj.inbuf = ""
-				uiobj.bufposition = 0
-				uiobj.commandpointer = -2
+				if uiobj.commandpointer <= len(uiobj.commandhist)-1:
+					uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
+					uiobj.bufposition = len(uiobj.inbuf)
+				else:
+					uiobj.bufposition = 0
+					uiobj.inbuf = ""
+					uiobj.commandpointer = -2
 			elif uiobj.commandhistpointer < len(uiobj.commandhist) and uiobj.commandpointer > -1:
+				uiobj.commandpointer += 1
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
-				uiobj.commandpointer += 1
-
 			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
 				uiobj.inputwin.write(tempbuf)
@@ -324,12 +324,11 @@ def InputLoop(uiobj):
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
 			elif uiobj.commandpointer < len(uiobj.commandhist) and uiobj.commandpointer > 0:
-				if uiobj.commandpointer == 0:
-					pass
-				else:
-					uiobj.commandpointer -= 1
-					uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
-					uiobj.bufposition = len(uiobj.inbuf)
+				uiobj.commandpointer -= 1
+				if uiobj.commandpointer < 0:
+					uiobj.commandpointer = 0
+				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
+				uiobj.bufposition = len(uiobj.inbuf)
 
 			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
