@@ -135,13 +135,7 @@ class CursesWindow(object):
 			return
 
 	def write(self,text):
-		count = 0
-		if len(text)-1 >= count:
-			while text[count] == ' ':
-				count += 1
-				if count > len(text):
-					break
-		self.scrollbacknosplit.append(" "*count + text)
+		self.scrollbacknosplit.append(text)
 		if self.box == True:
 			bufferlen = self.height-2
 			startx = 1
@@ -149,13 +143,9 @@ class CursesWindow(object):
 			bufferlen = self.height
 			startx = 0
 		lines = wordwrap(text,self.width-startx-startx)
-		num = 0
+
 		for line in lines:
-			if num == 0:
-				self.scrollback.append(" "*count+line)
-				num = 1
-			else:
-				self.scrollback.append(line)
+			self.scrollback.append(line)
 
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
@@ -206,6 +196,32 @@ def wordwrap(text,length):
 
 	linestring = ""
 	words = 0
+	x = 0
+	while x < len(text):
+		if text[x] != ' ':
+			nextspace = text[x:].find(' ')
+			word = text[x:nextspace]
+			y = nextspace
+			while text[y] == " ":
+				y += 1
+				if len(linestring) + 1 <= length:
+					linestring = linestring + " "
+				else:
+					lines.append(linestring)
+			x += 1 + y
+			if len(linestring)+len(word)+1 > length:
+				lines.append(linestring)
+			else:
+				linestring = linestring + " " + word
+		else:
+			x += 1
+			if len(linestring) == 0:
+				pass
+			elif len(linestring)+1 < length:
+				linestring = linestring + " "
+			else:
+				lines.append(linestring)
+
 	while len(text) > 0 and (text.find(' ') > length or text.find(' ') == -1):
 		if len(text) <= length:
 			lines.append(text)
@@ -420,9 +436,7 @@ def InputLoop(uiobj):
 				uiobj.inputwin.window.box()
 				uiobj.inputwin.window.refresh()
 		else:
-			if ch == ord(' ') and uiobj.bufposition == 0:
-				pass
-			elif uiobj.bufposition == len(uiobj.inbuf):
+			if uiobj.bufposition == len(uiobj.inbuf):
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
 				uiobj.bufposition += 1
 			elif uiobj.bufposition < len(uiobj.inbuf):
