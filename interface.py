@@ -180,17 +180,19 @@ def initWindows(uiobj):
 
 def wordwrap(text,length):
 	lines = []
-	split = text.split()
 
 	linestring = ""
 	words = 0
-
-	while text.find(' ') > length:
-		lines.append(text[0:length])
-		text = text[-length:]
-		if len(text) <= and text.find(' ') == -1:
+	while text.find(' ') > length or text.find(' ') == -1:
+		if len(text) <= length:
 			lines.append(text)
 			return lines
+		lines.append(text[0:length])
+		text = text[-length:]
+		if len(text) <= length and text.find(' ') == -1:
+			lines.append(text)
+			return lines
+	split = text.split()
 	for word in split:
 		if len(linestring) + len(word) + 1 <= length:
 			if words > 0:
@@ -241,6 +243,7 @@ def InputLoop(uiobj):
 							uiobj.mainwindow.window.clear()
 							uiobj.mainwindow.redraw_scrollback()
 							uiobj.mainwindow.refresh()
+							break
 						elif ch == ord('n') or ch == ord('N'):
 							killCurses(uiobj)
 							clientos = platform.system()
