@@ -3,7 +3,6 @@ import shutil
 import platform
 import os
 import sys
-import tempfile
 
 def ResizeScreen(x,y):
 		clientos = platform.system()
@@ -37,7 +36,6 @@ class CursesWindow(object):
 		self.box = box
 		self.scrollback = []
 		self.scrollbacknosplit = []
-		self.tempfile = None
 		if loglength == 0:
 			self.loglength = height
 		else:
