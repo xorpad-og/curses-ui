@@ -409,16 +409,14 @@ def InputLoop(uiobj):
 				uiobj.inputwin.window.box()
 				uiobj.inputwin.window.refresh()
 		else:
-			if uiobj.bufposition < len(uiobj.inbuf):
-				if uiobj.bufposition == 0:
-					uiobj.inbuf = str(chr(ch)) + uiobj.inbuf
-					uiobj.bufposition += 1
-				else:
-					uiobj.inbuf = uiobj.inbuf[:uiobj.bufposition] + str(chr(ch)) + uiobj.inbuf[uiobj.bufposition:]
-					uiobj.bufposition += 1
-			else:
+
+			if uiobj.bufposition == len(uiobj.inbuf):
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
 				uiobj.bufposition += 1
+			elif uiobj.bufposition < len(uiobj.inbuf):
+				uiobj.inbuf = uiobj.inbuf[:uiobj.bufposition] + str(chr(ch)) + uiobj.inbuf[uiobj.bufposition:]
+				uiobj.bufposition += 1
+
 			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
 				uiobj.inputwin.write(tempbuf)
