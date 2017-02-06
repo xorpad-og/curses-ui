@@ -61,6 +61,18 @@ class CursesWindow(object):
 		self.uiobj.screen.refresh()
 		self.window.refresh()
 
+	def drawinput(self,text,length):
+		if self.box == True:
+			startx = 1
+		textlen = self.width-startx-startx
+		if len(text) > self.width-startx-startx:
+			self.window.addstr(1,startx,text[-textlen:])
+		else:
+			self.window.addstr(1,startx,text)
+		self.window.clrtoeol()
+		self.window.box()
+		self.refresh()
+
 	def resize(self,height,width):
 		self.window.resize(height,width)
 		self.height = height
@@ -436,16 +448,10 @@ def InputLoop(uiobj):
 				uiobj.bufposition += 1
 
 			if len(uiobj.inbuf) >= uiobj.width-3:
-				tempbuf = uiobj.inbuf[-uiobj.width+2:]
-				uiobj.inputwin.write(tempbuf)
-				uiobj.inputwin.window.box()
-				uiobj.inputwin.window.refresh()
+				uiobj.inputwin.drawinput(uiobj.inbuf,uiobj.width-3)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 			else:
-				uiobj.inputwin.write(uiobj.inbuf)
-				uiobj.inputwin.window.clrtoeol()
-				uiobj.inputwin.window.box()
-				uiobj.inputwin.window.refresh()
+				uiobj.inputwin.drawinput(uiobj.inbuf,uiobj.width-3)
 				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 
 def killCurses(uiobj):
