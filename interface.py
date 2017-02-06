@@ -135,7 +135,13 @@ class CursesWindow(object):
 			return
 
 	def write(self,text):
-		self.scrollbacknosplit.append(text)
+		count = 0
+		if len(text)-1 >= count:
+			while text[count] == ' ':
+				count += 1
+				if count > len(text):
+					break
+		self.scrollbacknosplit.append(" "*count + text)
 		if self.box == True:
 			bufferlen = self.height-2
 			startx = 1
@@ -143,8 +149,13 @@ class CursesWindow(object):
 			bufferlen = self.height
 			startx = 0
 		lines = wordwrap(text,self.width-startx-startx)
+		num = 0
 		for line in lines:
-			self.scrollback.append(line)
+			if num == 0:
+				self.scrollback.append(" "*count+line)
+				num = 1
+			else:
+				self.scrollback.append(line)
 
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
