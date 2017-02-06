@@ -183,13 +183,13 @@ def wordwrap(text,length):
 
 	linestring = ""
 	words = 0
-	while text.find(' ') > length or text.find(' ') == -1:
+	while len(text) > 0 and (text.find(' ') > length or text.find(' ') == -1):
 		if len(text) <= length:
 			lines.append(text)
 			return lines
 		lines.append(text[0:length])
-		text = text[-length:]
-		if len(text) <= length and text.find(' ') == -1:
+		text = text[length:]
+		if len(text) <= length:
 			lines.append(text)
 			return lines
 	split = text.split()
@@ -243,6 +243,9 @@ def InputLoop(uiobj):
 							uiobj.mainwindow.window.clear()
 							uiobj.mainwindow.redraw_scrollback()
 							uiobj.mainwindow.refresh()
+							uiobj.inputwin.refresh()
+							uiobj.sidebar.refresh()
+							uiobj.screen.refresh()
 							break
 						elif ch == ord('n') or ch == ord('N'):
 							killCurses(uiobj)
