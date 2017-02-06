@@ -67,10 +67,10 @@ class CursesWindow(object):
 		self.height = height
 		self.width = width
 		if self.box == True:
-			bufferlen = height-2
+			bufferlen = self.height - 2
 			startx = 1
 		else:
-			bufferlen = height
+			bufferlen = self.height
 			startx = 0
 		if self.keeplog == False:
 			self.scrollbacknosplit = self.scrollbacknosplit[-bufferlen:]
@@ -119,6 +119,8 @@ class CursesWindow(object):
 			for line in self.scrollback:
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
+				if self.box == True:
+					self.window.box()
 				curline += 1
 			self.refresh()
 			return
@@ -127,6 +129,8 @@ class CursesWindow(object):
 			for line in self.scrollback[-bufferlen:]:
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
+				if self.window.bow == True:
+					self.window.box()
 				curline += 1
 			self.refresh()
 			return
@@ -157,7 +161,8 @@ class CursesWindow(object):
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
-			self.window.box()
+			if self.box == True:
+				self.window.box()
 			self.refresh()
 			return
 		if len(self.scrollback) >= bufferlen:
@@ -166,7 +171,8 @@ class CursesWindow(object):
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
-			self.window.box()
+			if self.box == True:
+				self.window.box()
 			self.refresh()
 			return
 
@@ -271,6 +277,8 @@ def InputLoop(uiobj):
 							uiobj.mainwindow = CursesWindow(uiobj,mainy,mainx,mainyloc,mainxloc,35,keeplog=True,loglength=128)
 							uiobj.sidebar = CursesWindow(uiobj,sidey,sidex,sideyloc,sidexloc,25)
 							uiobj.inputwin = CursesWindow(uiobj,inwiny,inwinx,inwinyloc,inwinxloc,3)
+							uiobj.mainwindow.redraw_scrollback()
+							uiobj.sidebar.redraw_scrollback()
 							uiobj.mainwindow.refresh()
 							uiobj.sidebar.refresh()
 							uiobj.inputwin.refresh()
