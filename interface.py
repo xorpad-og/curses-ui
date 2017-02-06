@@ -52,6 +52,7 @@ class CursesWindow(object):
 		self.window.idlok(False)
 		self.window.scrollok(False)
 		self.window.immedok(True)
+		self.box = box
 		self.window.box()
 		self.refresh()
 
@@ -235,32 +236,44 @@ def InputLoop(uiobj):
 					msgx,msgy = shutil.get_terminal_size()
 					windowx = uiobj.width
 					windowy = uiobj.height
-					oldy = uiobj.mainwindow.height
-					oldx = uiobj.mainwindow.width
-					uiobj.mainwindow.window.clear()
-					uiobj.mainwindow.window.resize(msgy,msgx)
-					uiobj.mainwindow.heigth = msgy
-					uiobj.mainwindow.window.box()
-					uiobj.screen.refresh()
-					uiobj.mainwindow.refresh()
-					oldscrollback = uiobj.mainwindow.scrollback
-					uiobj.mainwindow.scrollback = []
-					uiobj.mainwindow.write("You have resized the window too small for this client.")
-					uiobj.mainwindow.write("would you like to undo the resize? Selecting no will end the game.")
-					uiobj.mainwindow.write("[y/n]")
+					mainy = uiobj.mainwindow.height
+					mainx = uiobj.mainwindow.width
+					mainxloc = uiobj.mainwindow.loc_x
+					mainyloc = uiobj.mainwindow.loc_y
+					inwiny = uiobj.inputwin.height
+					inwinx = uiobj.inputwin.width
+					inwinyloc = uiobj.inputwin.loc_y
+					inwinxloc = uiobj.inputwin.loc_x
+					sidey = uiobj.sidebar.height
+					sidex = uiobj.sidebar.width
+					sideyloc = uiobj.sidebar.loc_y
+					sidexloc = uiobj.sidebar.loc_x
+					del uiobj.mainwindow.window
+					del uiobj.sidebar.window
+					del uiobj.inputwin.window
+					del uiobj.screen
+					uiobj.screen = curses.initscr()
+					tempwindow = CursesWindow(uiobj,msgy,msgx,0,0,1)
+					tempwindow.write("You have resized the window too small for this client.")
+					tempwindow.write("would you like to undo the resize? Selecting no will end the game.")
+					tempwindow.write("[y/n]")
 					while True:
 						ch = uiobj.screen.getch()
 						if ch == ord('Y') or ch == ord('y'):
+							del uiobj.screen
+							curses.endwin()
 							ResizeScreen(windowx,windowy)
-							uiobj.mainwindow.resize(oldy,oldx)
-							uiobj.mainwindow.window.box()
-							uiobj.mainwindow.scrollback = oldscrollback
-							uiobj.mainwindow.redraw_scrollback()
-							uiobj.sidebar.window.box()
-							uiobj.screen.refresh()
+							uiobj.screen = curses.initscr()
+							curses.cbreak()
+							uiobj.screen.keypad(True)
+							curses.curs_set(1)
+							uiobj.width, uiobj.height = shutil.get_terminal_size()
+							uiobj.mainwindow = CursesWindow(uiobj,mainy,mainx,mainyloc,mainxloc,35,keeplog=True,loglength=128)
+							uiobj.sidebar = CursesWindow(uiobj,sidey,sidex,sideyloc,sidexloc,25)
+							uiobj.inputwin = CursesWindow(uiobj,inwiny,inwinx,inwinyloc,inwinxloc,3)
 							uiobj.mainwindow.refresh()
-							uiobj.inputwin.refresh()
 							uiobj.sidebar.refresh()
+							uiobj.inputwin.refresh()
 							break
 						elif ch == ord('n') or ch == ord('N'):
 							killCurses(uiobj)
