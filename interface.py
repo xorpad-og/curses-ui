@@ -3,7 +3,7 @@ import shutil
 import platform
 import os
 import sys
-
+import tempfile
 
 def ResizeScreen(x,y):
 		clientos = platform.system()
@@ -36,6 +36,7 @@ class CursesWindow(object):
 		self.box = box
 		self.scrollback = []
 		self.scrollbacknosplit = []
+		self.tempfile = None
 		if loglength == 0:
 			self.loglength = height
 		else:
@@ -100,21 +101,42 @@ class CursesWindow(object):
 		self.loc_x = x
 		self.window.mvwin(y,x)
 
-	def write(self,text):
-		self.scrollbacknosplit.append(text)
-		if self.box == True:
-			lines = wordwrap(text,self.width-2)
-		else:
-			lines = wordwrap(text,self.width)
-		for line in lines:
-			self.scrollback.append(line)
-
+	def redraw_scrollback(self):
 		if self.box == True:
 			bufferlen = self.height-2
 			startx = 1
 		else:
 			bufferlen = self.height
 			startx = 0
+
+		if len(self.scrollback) < bufferlen:
+			curline = startx
+			for line in self.scrollback:
+				self.window.addstr(curline,startx,line)
+				self.window.clrtoeol()
+				curline += 1
+			self.refresh()
+			return
+		if len(self.scrollback) >= bufferlen:
+			curline = startx
+			for line in self.scrollback[-bufferlen:]:
+				self.window.addstr(curline,startx,line)
+				self.window.clrtoeol()
+				curline += 1
+			self.refresh()
+			return
+
+	def write(self,text):
+		self.scrollbacknosplit.append(text)
+		if self.box == True:
+			bufferlen = self.height-2
+			startx = 1
+		else:
+			bufferlen = self.height
+			startx = 0
+		lines = wordwrap(text,self.width-startx-startx)
+		for line in lines:
+			self.scrollback.append(line)
 
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
@@ -163,7 +185,7 @@ def wordwrap(text,length):
 	linestring = ""
 	words = 0
 	for word in split:
-		if len(linestring) + len(word) <= length:
+		if len(linestring) + len(word) + 1 <= length:
 			if words > 0:
 				linestring = linestring + " " + word
 				words += 1
@@ -179,9 +201,9 @@ def wordwrap(text,length):
 
 def InputLoop(uiobj):
 	uiobj.inbuf = ""
+	uiobj.screen.move(uiobj.height - 2, 1)
 	while True:
 		newx,newy = shutil.get_terminal_size()
-
 		ch = uiobj.screen.getch()
 		if ch == curses.KEY_RESIZE or newx != uiobj.width or newy != uiobj.height:
 			if newx < uiobj.width:
@@ -189,10 +211,38 @@ def InputLoop(uiobj):
 					uiobj.mainwindow.resize(uiobj.mainwindow.height,newx-uiobj.sidebar.minwidth)
 					uiobj.sidebar.move(uiobj.sidebar.loc_y,newx-uiobj.sidebar.minwidth)
 					uiobj.inputwin.resize(3,newx)
-					uiobj.width = newx
 					uiobj.mainwindow.refresh()
 					uiobj.sidebar.refresh()
 					uiobj.inputwin.refresh()
+					uiobj.width = newx
+				else:
+					windowx = uiobj.width
+					windowy = uiobj.height
+					oldy = uiobj.mainwindow.height
+					oldx = uiobj.mainwindow.width
+					uiobj.mainwindow.window.resize(newy,newx)
+					uiobj.mainwindow.window.clear()
+					uiobj.mainwindow.refresh()
+					uiobj.mainwindow.write("You have resized the window too small for this client.")
+					uiobj.mainwindow.write("would you like to undo the resize? Selecting no will end the game.")
+					uiobj.mainwindow.write("[y/n]")
+					while True:
+						ch = uiobj.screen.getch()
+						if ch == ord('Y') or ch == ord('y'):
+							ResizeScreen(windowx,windowy)
+							uiobj.mainwindow.resize(oldy,oldx)
+							uiobj.mainwindow.window.clear()
+							uiobj.mainwindow.redraw_scrollback()
+							uiobj.mainwindow.refresh()
+						elif ch == ord('n') or ch == ord('N'):
+							killCurses(uiobj)
+							clientos = platform.system()
+							if clientos == 'Windows':
+								os.system("cls")
+							elif clientos == 'Linux' or clientos == 'Darwin' or clientos.startswith('CYGWIN'):
+								os.system("clear")
+							print("Good bye!")
+							exit(0)
 			continue
 		if ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
