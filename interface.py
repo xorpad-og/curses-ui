@@ -197,54 +197,46 @@ def wordwrap(text,length):
 	linestring = ""
 	words = 0
 	x = 0
-	while x < len(text):
+	while x <= len(text):
 		if text[x] != ' ':
 			nextspace = text[x:].find(' ')
-			word = text[x:nextspace]
-			y = nextspace
-			while text[y] == " ":
-				y += 1
-				if len(linestring) + 1 <= length:
-					linestring = linestring + " "
+			if nextspace == -1:
+				if len(linestring) + len(text[x:]) <= length:
+					linestring = linestring+text[x:]
+					lines.append(linestring)
 				else:
 					lines.append(linestring)
-			x += 1 + y
-			if len(linestring)+len(word)+1 > length:
+					linestring = ""
+					linestring = linestring+text[x:]
+					lines.append(linestring)
+				return(lines)
+			linestring = linestring + text[x:x+nextspace]
+			if len(linestring) == length:
 				lines.append(linestring)
-			else:
-				linestring = linestring + " " + word
+				linestring = ""
+			x = x + nextspace
+			while text[x] == ' ':
+				x += 1
+				if len(linestring) == 0:
+					pass
+				elif len(linestring) == length:
+					lines.append(linestring)
+					linestring = ""
+				elif len(linestring) > 0 and len(linestring) + 1 < length:
+					linestring = linestring + " "
+				else:
+					linestring = linestring + " "
+					lines.append(linestring)
+					linestring = ""
 		else:
 			x += 1
 			if len(linestring) == 0:
 				pass
-			elif len(linestring)+1 < length:
+			elif len(linestring)+1 <= length:
 				linestring = linestring + " "
-			else:
-				lines.append(linestring)
-
-	while len(text) > 0 and (text.find(' ') > length or text.find(' ') == -1):
-		if len(text) <= length:
-			lines.append(text)
-			return lines
-		lines.append(text[0:length])
-		text = text[length:]
-		if len(text) <= length:
-			lines.append(text)
-			return lines
-	split = text.split()
-	for word in split:
-		if len(linestring) + len(word) + 1 <= length:
-			if words > 0:
-				linestring = linestring + " " + word
-				words += 1
-			else:
-				linestring = word
-				words += 1
-		else:
-			lines.append(linestring)
-			linestring = word
-			words = 1
-	lines.append(linestring)
+				if len(linestring) == length:
+					lines.append(linestring)
+					linestring = ""
 	return lines
 
 def InputLoop(uiobj):
