@@ -409,8 +409,9 @@ def InputLoop(uiobj):
 				uiobj.inputwin.window.box()
 				uiobj.inputwin.window.refresh()
 		else:
-
-			if uiobj.bufposition == len(uiobj.inbuf):
+			if ch == ord(' ') and uiobj.bufposition == 0:
+				pass
+			elif uiobj.bufposition == len(uiobj.inbuf):
 				uiobj.inbuf = "%s%s" % (uiobj.inbuf,str(chr(ch)))
 				uiobj.bufposition += 1
 			elif uiobj.bufposition < len(uiobj.inbuf):
