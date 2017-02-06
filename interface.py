@@ -184,6 +184,13 @@ def wordwrap(text,length):
 
 	linestring = ""
 	words = 0
+
+	while text.find(' ') > length:
+		lines.append(text[0:length])
+		text = text[-length:]
+		if len(text) <= and text.find(' ') == -1:
+			lines.append(text)
+			return lines
 	for word in split:
 		if len(linestring) + len(word) + 1 <= length:
 			if words > 0:
