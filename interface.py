@@ -197,7 +197,7 @@ def initWindows(uiobj):
 
 def wordwrap(text,length):
 	lines = []
-
+	text = text.strip()
 	linestring = ""
 	words = 0
 	x = 0
@@ -219,13 +219,11 @@ def wordwrap(text,length):
 				lines.append(linestring)
 				linestring = ""
 			x = x + nextspace
-			if x > len(text)
-				if linestring == "" or linestring.strip() == "":
-					return lines
-				else:
+			if x >= len(text):
+				if linestring != "" and linestring.strip() != "":
 					lines.append(linestring)
-					return lines
-			while text[x] == ' ':
+				return lines
+			while x < len(text) and text[x] == ' ':
 				x += 1
 				if len(linestring) == 0:
 					pass
