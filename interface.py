@@ -4,6 +4,12 @@ import platform
 import os
 import sys
 
+def refreshscreen(uiobj):
+	uiobj.screen.refresh()
+	uiobj.mainwindow.refresh()
+	uiobj.sidebar.refresh()
+	uiobj.inputwin.refresh()
+
 def ResizeScreen(x,y):
 		clientos = platform.system()
 		if clientos == 'Windows':
@@ -52,7 +58,6 @@ class CursesWindow(object):
 		self.window.scrollok(False)
 		self.window.immedok(True)
 		self.box = box
-		self.window.box()
 		self.refresh()
 
 	def refresh(self):
@@ -70,7 +75,6 @@ class CursesWindow(object):
 		else:
 			self.window.addstr(1,startx,text)
 		self.window.clrtoeol()
-		self.window.box()
 		self.refresh()
 
 	def resize(self,height,width):
@@ -101,7 +105,6 @@ class CursesWindow(object):
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
-			self.window.box()
 			self.refresh()
 		else:
 			curline = startx
@@ -109,7 +112,6 @@ class CursesWindow(object):
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
-			self.window.box()
 			self.refresh()
 
 	def move(self,y,x):
@@ -130,8 +132,6 @@ class CursesWindow(object):
 			for line in self.scrollback:
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
-				if self.box == True:
-					self.window.box()
 				curline += 1
 			self.refresh()
 			return
@@ -140,8 +140,6 @@ class CursesWindow(object):
 			for line in self.scrollback[-bufferlen:]:
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
-				if self.window.bow == True:
-					self.window.box()
 				curline += 1
 			self.refresh()
 			return
@@ -173,8 +171,6 @@ class CursesWindow(object):
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
-			if self.box == True:
-				self.window.box()
 			self.refresh()
 			return
 		if len(self.scrollback) >= bufferlen:
@@ -183,8 +179,6 @@ class CursesWindow(object):
 				self.window.addstr(curline,startx,line)
 				self.window.clrtoeol()
 				curline += 1
-			if self.box == True:
-				self.window.box()
 			self.refresh()
 			return
 
@@ -199,9 +193,7 @@ def initWindows(uiobj):
 	uiobj.sidebar = CursesWindow(uiobj,height-3,width-uiobj.mainwindow.width,0,uiobj.mainwindow.width,25)
 	uiobj.inputwin = CursesWindow(uiobj,3,width,uiobj.mainwindow.height,0,3,showcursor=True)
 
-	uiobj.mainwindow.refresh()
-	uiobj.sidebar.refresh()
-	uiobj.inputwin.refresh()
+	refreshscreen(uiobj)
 
 def wordwrap(text,length):
 	lines = []
@@ -263,10 +255,7 @@ def InputLoop(uiobj):
 					uiobj.mainwindow.resize(uiobj.mainwindow.height,newx-uiobj.sidebar.minwidth)
 					uiobj.sidebar.move(uiobj.sidebar.loc_y,newx-uiobj.sidebar.minwidth)
 					uiobj.inputwin.resize(3,newx)
-					uiobj.screen.refresh()
-					uiobj.mainwindow.refresh()
-					uiobj.sidebar.refresh()
-					uiobj.inputwin.refresh()
+					refreshscreen(uiobj)
 					uiobj.width = newx
 				else:
 					msgx,msgy = shutil.get_terminal_size()
@@ -309,9 +298,7 @@ def InputLoop(uiobj):
 							uiobj.inputwin = CursesWindow(uiobj,inwiny,inwinx,inwinyloc,inwinxloc,3)
 							uiobj.mainwindow.redraw_scrollback()
 							uiobj.sidebar.redraw_scrollback()
-							uiobj.mainwindow.refresh()
-							uiobj.sidebar.refresh()
-							uiobj.inputwin.refresh()
+							refreshscreen(uiobj)
 							break
 						elif ch == ord('n') or ch == ord('N'):
 							killCurses(uiobj)
@@ -362,10 +349,10 @@ def InputLoop(uiobj):
 
 			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
-				uiobj.inputwin.write(tempbuf)
+				uiobj.inputwin.drawinput(tempbuf,uiobj.width-2)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 			else:
-				uiobj.inputwin.write(uiobj.inbuf)
+				uiobj.inputwin.drawinput(uiobj.inbuf,uiobj.width-2)
 				uiobj.inputwin.window.clrtoeol()
 				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 
@@ -389,20 +376,12 @@ def InputLoop(uiobj):
 				exit(0)
 			uiobj.commandhist.append(uiobj.inbuf)
 			uiobj.mainwindow.write(uiobj.inbuf)
-			uiobj.inputwin.write(" ")
-			uiobj.inputwin.window.clrtoeol()
-			uiobj.inputwin.window.box()
-			uiobj.screen.refresh()
-			uiobj.inputwin.window.refresh()
 			uiobj.inputwin.drawinput(" ",uiobj.width-2)
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inbuf = ""
 			uiobj.bufposition = 0
 			uiobj.commandpointer = -2
-			uiobj.mainwindow.window.refresh()
-			uiobj.inputwin.window.refresh()
-			uiobj.sidebar.window.box()
-			uiobj.sidebar.window.refresh()
+			refreshscreen(uiobj)
 			continue
 
 		elif ch == curses.KEY_BACKSPACE or ch == 127 or ch == 800 or ch == 8:
@@ -428,7 +407,6 @@ def InputLoop(uiobj):
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				uiobj.inputwin.window.clrtoeol()
-				uiobj.inputwin.window.box()
 				uiobj.inputwin.window.refresh()
 			elif len(uiobj.inbuf) > 0:
 				uiobj.inbuf = uiobj.inbuf[:-1]
@@ -439,7 +417,6 @@ def InputLoop(uiobj):
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				uiobj.inputwin.window.clrtoeol()
-				uiobj.inputwin.window.box()
 				uiobj.inputwin.window.refresh()
 		else:
 			if uiobj.bufposition == len(uiobj.inbuf):
