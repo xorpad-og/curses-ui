@@ -209,7 +209,7 @@ def wordwrap(text,length):
 	linestring = ""
 	words = 0
 	x = 0
-	while x <= len(text):
+	while x < len(text):
 		if text[x] != ' ':
 			nextspace = text[x:].find(' ')
 			if nextspace == -1:
@@ -324,7 +324,7 @@ def InputLoop(uiobj):
 							exit(0)
 		elif ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
-				continue
+				uiobj.inputwin.drawinput(" ",uiobj.width-2)
 			elif uiobj.commandpointer < len(uiobj.commandhist) and len(uiobj.commandhist) > 0:
 				uiobj.commandpointer += 1
 				if uiobj.commandpointer <= len(uiobj.commandhist)-1:
@@ -334,17 +334,18 @@ def InputLoop(uiobj):
 					uiobj.bufposition = 0
 					uiobj.inbuf = ""
 					uiobj.commandpointer = -2
+					uiobj.inputwin.drawinput(" ",uiobj.width-2)
 			elif uiobj.commandhistpointer < len(uiobj.commandhist) and uiobj.commandpointer > -1:
 				uiobj.commandpointer += 1
 				uiobj.inbuf = uiobj.commandhist[uiobj.commandpointer]
 				uiobj.bufposition = len(uiobj.inbuf)
 			if len(uiobj.inbuf) >= uiobj.width-3:
 				tempbuf = uiobj.inbuf[-uiobj.width+2:]
-				uiobj.inputwin.write(tempbuf)
+				uiobj.inputwin.drawinput(uiobj.inbuf,uiobj.width-2)
 				uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 			else:
 				uiobj.inputwin.write(uiobj.inbuf)
-				uiobj.inputwin.window.clrtoeol()
+				uiobj.inputwin.drawinput(uiobj.inbuf,uiobj.width-2)
 				uiobj.screen.move(uiobj.height-2,len(uiobj.inbuf)+1)
 
 		elif ch == curses.KEY_UP:
@@ -393,6 +394,7 @@ def InputLoop(uiobj):
 			uiobj.inputwin.window.box()
 			uiobj.screen.refresh()
 			uiobj.inputwin.window.refresh()
+			uiobj.inputwin.drawinput(" ",uiobj.width-2)
 			uiobj.screen.move(uiobj.height-2,1)
 			uiobj.inbuf = ""
 			uiobj.bufposition = 0
