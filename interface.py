@@ -28,7 +28,6 @@ class InterfaceObject(object):
 		self.width,self.height=shutil.get_terminal_size()
 		self.inbuf = ""
 		self.commandpointer = -2
-		self.lastpointer = -2
 
 class CursesWindow(object):
 	def __init__(self,uiobj,height,width,loc_y,loc_x,minwidth,box=True,keeplog=False,loglength=0,showcursor=False):
@@ -118,6 +117,7 @@ class CursesWindow(object):
 		self.loc_y = y
 		self.loc_x = x
 		self.window.mvwin(y,x)
+		self.window.refresh()
 
 	def redraw_scrollback(self):
 		if self.box == True:
@@ -219,6 +219,12 @@ def wordwrap(text,length):
 				lines.append(linestring)
 				linestring = ""
 			x = x + nextspace
+			if x > len(text)
+				if linestring == "" or linestring.strip() == "":
+					return lines
+				else:
+					lines.append(linestring)
+					return lines
 			while text[x] == ' ':
 				x += 1
 				if len(linestring) == 0:
