@@ -99,19 +99,11 @@ class CursesWindow(object):
 			self.scrollback = self.scrollback[-bufferlen:]
 
 		if len(self.scrollback) < bufferlen:
-			curline = startx
 			for line in self.scrollback:
-				self.window.addstr(curline,startx,line)
-				self.window.clrtoeol()
-				curline += 1
-			self.refresh()
+				self.write(line,True)
 		else:
-			curline = startx
 			for line in self.scrollback[-bufferlen:]:
-				self.window.addstr(curline,startx,line)
-				self.window.clrtoeol()
-				curline += 1
-			self.refresh()
+				self.write(line,True)
 
 	def move(self,y,x):
 		self.loc_y = y
@@ -144,8 +136,9 @@ class CursesWindow(object):
 			self.refresh()
 			return
 
-	def write(self,text):
-		self.scrollbacknosplit.append(text)
+	def write(self,text,noappend=False):
+		if noappend == False:
+			self.scrollbacknosplit.append(text)
 		if self.box == True:
 			bufferlen = self.height-2
 			startx = 1
@@ -153,9 +146,9 @@ class CursesWindow(object):
 			bufferlen = self.height
 			startx = 0
 		lines = wordwrap(text,self.width-startx-startx)
-
-		for line in lines:
-			self.scrollback.append(line)
+		if noappend == False:
+			for line in lines:
+				self.scrollback.append(line)
 
 		if self.keeplog == False:
 			self.scrollback = self.scrollback[-bufferlen:]
@@ -289,6 +282,7 @@ def InputLoop(uiobj):
 					while True:
 						ch = uiobj.screen.getch()
 						if ch == ord('Y') or ch == ord('y'):
+							del tempwindow
 							del uiobj.screen
 							curses.endwin()
 							ResizeScreen(windowx,windowy)
