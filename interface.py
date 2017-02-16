@@ -14,8 +14,10 @@ def ResizeScreen(x,y):
 		clientos = platform.system()
 		if clientos == 'Windows':
 			os.system("mode {rows},{columns}".format(rows=x,columns=y))
-		elif clientos == 'Linux' or clientos == 'Darwin' or clientos.startswith('CYGWIN'):
+		elif clientos == 'Linux' or clientos == 'Darwin':
 			sys.stdout.write("\x1b[8;{columns};{rows}t".format(rows=x,columns=y))
+		elif clientos.startswith('CYGWIN'):
+			os.system("echo -ne '\e[8;{columns};{rows}t'".format(rows=x,columns=y))
 
 class InterfaceObject(object):
 	def __init__(self):
@@ -192,7 +194,6 @@ def wordwrap(text,length):
 	lines = []
 	text = text.strip()
 	linestring = ""
-	words = 0
 	x = 0
 	while x < len(text):
 		if text[x] != ' ':
@@ -411,7 +412,7 @@ def InputLoop(uiobj):
 				uiobj.bufposition -= 1
 				uiobj.inputwin.write(uiobj.inbuf[-uiobj.width-3:])
 				if  len(uiobj.inbuf) - uiobj.width-3 > 0:
-					uiobj.screen.move(uiobj.height-2,obj.width-1)
+					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.bufposition+1)
 				uiobj.inputwin.window.clrtoeol()
