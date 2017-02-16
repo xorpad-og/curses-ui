@@ -116,25 +116,19 @@ class CursesWindow(object):
 	def redraw_scrollback(self):
 		if self.box == True:
 			bufferlen = self.height-2
-			startx = 1
 		else:
 			bufferlen = self.height
-			startx = 0
 
 		if len(self.scrollback) < bufferlen:
-			curline = startx
 			for line in self.scrollback:
-				self.window.addstr(curline,startx,line)
+				self.window.write(line)
 				self.window.clrtoeol()
-				curline += 1
 			self.refresh()
 			return
 		if len(self.scrollback) >= bufferlen:
-			curline = startx
 			for line in self.scrollback[-bufferlen:]:
-				self.window.addstr(curline,startx,line)
+				self.window.write(line)
 				self.window.clrtoeol()
-				curline += 1
 			self.refresh()
 			return
 
