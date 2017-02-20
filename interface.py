@@ -223,7 +223,8 @@ def wordwrap(text,length):
 				return(lines)
 			if len(linestring) + len(text[x:x+nextspace]) <= length:
 				linestring = linestring + text[x:x+nextspace]
-				break
+				x = x + nextspace
+				continue
 			if len(linestring) >= length:
 				lines.append(linestring)
 				linestring = ""
@@ -232,19 +233,6 @@ def wordwrap(text,length):
 				if linestring.strip() != "":
 					lines.append(linestring)
 				return lines
-#			while x < len(text) and text[x] == ' ':
-#				x += 1
-#				if len(linestring) == 0:
-#					return lines
-#				elif len(linestring) == length:
-#					lines.append(linestring)
-#					linestring = ""
-#				elif len(linestring) > 0 and len(linestring) + 1 < length:
-#					linestring = linestring + " "
-#				else:
-#					linestring = linestring + " "
-#					lines.append(linestring)
-#					linestring = ""
 		else:
 			x += 1
 			if len(linestring) == 0:
