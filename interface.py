@@ -232,19 +232,19 @@ def wordwrap(text,length):
 				if linestring.strip() != "":
 					lines.append(linestring)
 				return lines
-			while x < len(text) and text[x] == ' ':
-				x += 1
-				if len(linestring) == 0:
-					return lines
-				elif len(linestring) == length:
-					lines.append(linestring)
-					linestring = ""
-				elif len(linestring) > 0 and len(linestring) + 1 < length:
-					linestring = linestring + " "
-				else:
-					linestring = linestring + " "
-					lines.append(linestring)
-					linestring = ""
+#			while x < len(text) and text[x] == ' ':
+#				x += 1
+#				if len(linestring) == 0:
+#					return lines
+#				elif len(linestring) == length:
+#					lines.append(linestring)
+#					linestring = ""
+#				elif len(linestring) > 0 and len(linestring) + 1 < length:
+#					linestring = linestring + " "
+#				else:
+#					linestring = linestring + " "
+#					lines.append(linestring)
+#					linestring = ""
 		else:
 			x += 1
 			if len(linestring) == 0:
@@ -254,8 +254,8 @@ def wordwrap(text,length):
 				if len(linestring) == length:
 					lines.append(linestring)
 					linestring = ""
-			else:
-				pass
+	if linestring != "":
+		lines.append(linestring)
 	return lines
 
 def InputLoop(uiobj):
