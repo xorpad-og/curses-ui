@@ -3,6 +3,7 @@ import shutil
 import platform
 import os
 import sys
+from time import sleep
 
 def refreshscreen(uiobj):
 	uiobj.screen.refresh()
@@ -122,13 +123,11 @@ class CursesWindow(object):
 		if len(self.scrollback) < bufferlen:
 			for line in self.scrollback:
 				self.window.write(line)
-				self.window.clrtoeol()
 			self.refresh()
 			return
 		if len(self.scrollback) >= bufferlen:
 			for line in self.scrollback[-bufferlen:]:
 				self.window.write(line)
-				self.window.clrtoeol()
 			self.refresh()
 			return
 
@@ -192,17 +191,29 @@ def wordwrap(text,length):
 	while x < len(text):
 		if text[x] != ' ':
 			nextspace = text[x:].find(' ')
-			if nextspace == -1:
+			if nextspace == -1 and len(text[x:]) <= length:
 				if len(linestring) + len(text[x:]) <= length:
 					linestring = linestring+text[x:]
 					lines.append(linestring)
 				else:
 					lines.append(linestring)
-					linestring = ""
-					linestring = linestring+text[x:]
+					linestring = text[x:]
 					lines.append(linestring)
 				return(lines)
-			linestring = linestring + text[x:x+nextspace]
+			elif nextspace == -1 and len(text[x:]) > length:
+				while len(text) > 0:
+					if len(text[x:]) >= length:
+						lines.append(text[x:x+length])
+						if len(text[x+length]):
+							text = text[x+length:]
+					else:
+						lines.append(text[x:])
+						text = ""
+				return(lines)
+			if len(linestring) + len(text[x:x+nextspace]) <= length:
+				linestring = linestring + text[x:x+nextspace]
+				lines.append(linestring)
+				linestring =  "" # text[x:x+nextspace]
 			if len(linestring) == length:
 				lines.append(linestring)
 				linestring = ""
@@ -242,7 +253,9 @@ def InputLoop(uiobj):
 		newx,newy = shutil.get_terminal_size()
 		ch = uiobj.screen.getch()
 		if ch == curses.KEY_RESIZE or newx != uiobj.width or newy != uiobj.height:
-			if newx < uiobj.width:
+			if newx == uiobj.width:
+				pass
+			elif newx < uiobj.width:
 				if newx-uiobj.sidebar.minwidth >= uiobj.mainwindow.minwidth:
 					uiobj.mainwindow.resize(uiobj.mainwindow.height,newx-uiobj.sidebar.minwidth)
 					uiobj.sidebar.move(uiobj.sidebar.loc_y,newx-uiobj.sidebar.minwidth)
@@ -281,6 +294,7 @@ def InputLoop(uiobj):
 							del uiobj.screen
 							curses.endwin()
 							ResizeScreen(windowx,windowy)
+							sleep(0.1) #let the window resize
 							uiobj.screen = curses.initscr()
 							curses.cbreak()
 							uiobj.screen.keypad(True)
@@ -302,6 +316,8 @@ def InputLoop(uiobj):
 								os.system("clear")
 							print("Good bye!")
 							exit(0)
+			elif newx > uiobj.width:
+				pass
 		elif ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
 				uiobj.inputwin.drawinput(" ",uiobj.width-2)
