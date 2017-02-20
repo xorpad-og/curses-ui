@@ -212,14 +212,13 @@ def wordwrap(text,length):
 				return(lines)
 			if len(linestring) + len(text[x:x+nextspace]) <= length:
 				linestring = linestring + text[x:x+nextspace]
-#				lines.append(linestring)
-#				linestring =  ""
-			if len(linestring) == length:
+				break
+			if len(linestring) >= length:
 				lines.append(linestring)
 				linestring = ""
 			x = x + nextspace
 			if x >= len(text):
-				if linestring != "" and linestring.strip() != "":
+				if linestring.strip() != "":
 					lines.append(linestring)
 				return lines
 			while x < len(text) and text[x] == ' ':
