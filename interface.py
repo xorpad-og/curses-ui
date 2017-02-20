@@ -202,13 +202,24 @@ def wordwrap(text,length):
 				return(lines)
 			elif nextspace == -1 and len(text[x:]) > length:
 				while len(text) > 0:
-					if len(text[x:]) >= length:
+					if len(text[x:]) + len(linestring) >= length:
+						lines.append(linestring)
+						linestring = text[x:]
+						x += len(linestring) + len(text[x:])
+						if x > len(text):
+							lines.append(linestring)
+							return(lines)
+					elif len(text[x:]) < length and len(linestring) + len(text[x:]) <= length:
 						lines.append(text[x:x+length])
-						if len(text[x+length]):
-							text = text[x+length:]
+						if len(text[x+length:]) < length:
+							linestring = text[x+length:]
+							x += len(text[x+length])
+							if x > len(text):
+								lines.append(linestring)
+								return(lines)
 					else:
 						lines.append(text[x:])
-						text = ""
+						linestring = ""
 				return(lines)
 			if len(linestring) + len(text[x:x+nextspace]) <= length:
 				linestring = linestring + text[x:x+nextspace]
@@ -224,7 +235,7 @@ def wordwrap(text,length):
 			while x < len(text) and text[x] == ' ':
 				x += 1
 				if len(linestring) == 0:
-					pass
+					return lines
 				elif len(linestring) == length:
 					lines.append(linestring)
 					linestring = ""
@@ -243,6 +254,8 @@ def wordwrap(text,length):
 				if len(linestring) == length:
 					lines.append(linestring)
 					linestring = ""
+			else:
+				pass
 	return lines
 
 def InputLoop(uiobj):
