@@ -33,7 +33,7 @@ class InterfaceObject(object):
 		self.commandpointer = -2
 
 class CursesWindow(object):
-	def __init__(self,uiobj,height,width,loc_y,loc_x,minwidth,box=True,keeplog=False,loglength=0,showcursor=False):
+	def __init__(self,uiobj,height,width,loc_y,loc_x,minwidth,box=True,fixedwidth=False,keeplog=False,loglength=0,showcursor=False):
 		self.uiobj = uiobj
 		self.window = curses.newwin(height,width,loc_y,loc_x)
 		self.height = height
@@ -41,6 +41,7 @@ class CursesWindow(object):
 		self.loc_y = loc_y
 		self.loc_x = loc_x
 		self.minwidth = minwidth
+		self.fixedwidth = fixedwidth
 		self.box = box
 		self.scrollback = []
 		self.scrollbacknosplit = []
@@ -81,6 +82,7 @@ class CursesWindow(object):
 
 	def resize(self,height,width):
 		self.window.resize(height,width)
+		self.window.clear()
 		self.height = height
 		self.width = width
 		if self.box == True:
@@ -252,6 +254,7 @@ def InputLoop(uiobj):
 	while True:
 		newx,newy = shutil.get_terminal_size()
 		ch = uiobj.screen.getch()
+
 		if ch == curses.KEY_RESIZE or newx != uiobj.width or newy != uiobj.height:
 			if newx == uiobj.width:
 				pass
@@ -317,7 +320,12 @@ def InputLoop(uiobj):
 							print("Good bye!")
 							exit(0)
 			elif newx > uiobj.width:
-				pass
+				uiobj.sidebar.move(uiobj.sidebar.loc_y, newx - uiobj.sidebar.minwidth)
+				uiobj.mainwindow.resize(uiobj.mainwindow.height, newx - uiobj.sidebar.minwidth)
+				uiobj.inputwin.resize(uiobj.inputwin.height, newx)
+				refreshscreen(uiobj)
+				uiobj.width = newx
+
 		elif ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
 				uiobj.inputwin.drawinput(" ",uiobj.width-2)
@@ -372,6 +380,7 @@ def InputLoop(uiobj):
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1-uiobj.bufposition+1)
 				uiobj.bufposition -= 1
+
 		elif ch == curses.KEY_RIGHT or ch == 261:
 			if uiobj.bufposition < len(uiobj.inbuf):
 				if uiobj.bufposition+1 <uiobj.width-1:
@@ -379,6 +388,7 @@ def InputLoop(uiobj):
 				else:
 					uiobj.screen.move(uiobj.height-2,uiobj.width-1)
 				uiobj.bufposition += 1
+
 		elif ch == curses.KEY_ENTER or ch == 10 or ch == 13:
 			if uiobj.inbuf.lower() == "quit":
 				killCurses(uiobj)
