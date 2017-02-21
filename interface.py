@@ -231,7 +231,6 @@ def wordwrap(text,length):
 				return(lines)
 			if len(linestring) + len(text[x:x+nextspace]) <= length:
 				linestring = linestring + text[x:x+nextspace]
-#				x = x + nextspace
 			if len(linestring) >= length:
 				lines.append(linestring)
 				linestring = ""
