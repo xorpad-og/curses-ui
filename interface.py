@@ -204,7 +204,7 @@ def wordwrap(text,length):
 					if len(text[x:]) + len(linestring) >= length:
 						lines.append(linestring)
 						linestring = text[x:]
-						x = x + len(linestring) + len(text[x:])
+						x = x + len(text[x:])
 						if x > len(text):
 							lines.append(linestring)
 							return(lines)
