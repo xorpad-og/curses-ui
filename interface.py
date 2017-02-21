@@ -201,15 +201,7 @@ def wordwrap(text,length):
 				return(lines)
 			elif nextspace == -1 and len(text[x:]) > length:
 				while len(text) > 0:
-					if len(text[x:]) + len(linestring) >= length:
-						lines.append(linestring)
-						linestring = text[x:]
-						x = x + len(text[x:])
-						if x > len(text):
-							lines.append(linestring)
-							return(lines)
-					elif len(linestring) + len(text[x:]) > length:
-						#bug is here somewhere
+					if len(linestring) + len(text[x:]) > length:
 						lines.append(linestring)
 						if len(text[x+length:]) <= length:
 							linestring = text[x+length:]
@@ -217,17 +209,14 @@ def wordwrap(text,length):
 							if x > len(text):
 								lines.append(text[x:x+length])
 								return(lines)
-					elif len(text[x:]) <= length:
-						lines.append(linestring)
-						linestring = text[x:]
-						x += len(text[x:])
-						lines.append(linestring)
-						return lines
-					else:
-						lines.append(linestring)
-						lines.append(text[x:])
-						x += len(text[x:])
-						linestring = ""
+						elif len(text[x:]) <= length:
+							lines.append(linestring)
+							lines.append(text[x:])
+							return lines
+						if x > len(text):
+							if len(linestring.strip()) > 0:
+								lines.append(linestring)
+							return lines
 				return(lines)
 			if len(linestring) + len(text[x:x+nextspace]) <= length:
 				linestring = linestring + text[x:x+nextspace]
@@ -242,6 +231,8 @@ def wordwrap(text,length):
 		else:
 			x += 1
 			if len(linestring) == 0:
+				pass
+			elif len(linestring) >= length:
 				pass
 			elif len(linestring)+1 <= length:
 				linestring = linestring + " "
