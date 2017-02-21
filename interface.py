@@ -258,9 +258,13 @@ def InputLoop(uiobj):
 			if newx == uiobj.width:
 				pass
 			elif newx < uiobj.width:
+				newyoffset = uiobj.height - newy
 				if newx-uiobj.sidebar.minwidth >= uiobj.mainwindow.minwidth:
-					uiobj.mainwindow.resize(uiobj.mainwindow.height,newx-uiobj.sidebar.minwidth)
+					uiobj.mainwindow.resize(uiobj.mainwindow.height-newyoffset,newx-uiobj.sidebar.minwidth)
 					uiobj.sidebar.move(uiobj.sidebar.loc_y,newx-uiobj.sidebar.minwidth)
+					if newyoffset != 0:
+						uiobj.inputwin.move(newy-3,0)
+						uiobj.sidebar.resize(uiobj.sidebar.height-newyoffset,uiobj.sidebar.minwidth)
 					uiobj.inputwin.resize(3,newx)
 					refreshscreen(uiobj)
 					uiobj.width = newx
