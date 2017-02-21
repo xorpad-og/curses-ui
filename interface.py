@@ -326,11 +326,16 @@ def InputLoop(uiobj):
 							print("Good bye!")
 							exit(0)
 			elif newx > uiobj.width:
-				uiobj.sidebar.move(uiobj.sidebar.loc_y, newx - uiobj.sidebar.minwidth-1)
-				uiobj.mainwindow.resize(uiobj.mainwindow.height, newx - uiobj.sidebar.minwidth)
-				uiobj.inputwin.resize(uiobj.inputwin.height, newx)
+				newyoffset = uiobj.height - newy
+				if newyoffset != 0:
+					uiobj.inputwin.move(newy-3,0)
+					uiobj.sidebar.resize(uiobj.sidebar.height-newyoffset,uiobj.sidebar.minwidth)
+#				uiobj.inputwin.resize(uiobj.inputwin.height, newx)
+				uiobj.mainwindow.resize(uiobj.mainwindow.height - newyoffset, newx - uiobj.sidebar.minwidth)
+				uiobj.sidebar.move(uiobj.sidebar.loc_y, newx - uiobj.sidebar.minwidth)
 				refreshscreen(uiobj)
 				uiobj.width = newx
+				uiobj.height = newy
 				continue
 		elif ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
