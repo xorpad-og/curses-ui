@@ -255,7 +255,7 @@ def InputLoop(uiobj):
 		ch = uiobj.screen.getch()
 
 		if ch == curses.KEY_RESIZE or newx != uiobj.width or newy != uiobj.height:
-			if newx == uiobj.width:
+			if newx == uiobj.width and newy == uiobj.height:
 				pass
 			elif newx < uiobj.width:
 				newyoffset = uiobj.height - newy
@@ -268,6 +268,7 @@ def InputLoop(uiobj):
 					uiobj.inputwin.resize(3,newx)
 					refreshscreen(uiobj)
 					uiobj.width = newx
+					uiobj.height = newy
 				else:
 					msgx,msgy = shutil.get_terminal_size()
 					windowx = uiobj.width
@@ -309,6 +310,8 @@ def InputLoop(uiobj):
 							uiobj.mainwindow = CursesWindow(uiobj,mainy,mainx,mainyloc,mainxloc,35,keeplog=True,loglength=128)
 							uiobj.sidebar = CursesWindow(uiobj,sidey,sidex,sideyloc,sidexloc,25)
 							uiobj.inputwin = CursesWindow(uiobj,inwiny,inwinx,inwinyloc,inwinxloc,3)
+							uiobj.inputwin.window.clear()
+							uiobj.inputwin.window.box()
 							uiobj.mainwindow.redraw_scrollback()
 							uiobj.sidebar.redraw_scrollback()
 							refreshscreen(uiobj)
@@ -323,12 +326,12 @@ def InputLoop(uiobj):
 							print("Good bye!")
 							exit(0)
 			elif newx > uiobj.width:
-				uiobj.sidebar.move(uiobj.sidebar.loc_y, newx - uiobj.sidebar.minwidth)
+				uiobj.sidebar.move(uiobj.sidebar.loc_y, newx - uiobj.sidebar.minwidth-1)
 				uiobj.mainwindow.resize(uiobj.mainwindow.height, newx - uiobj.sidebar.minwidth)
 				uiobj.inputwin.resize(uiobj.inputwin.height, newx)
 				refreshscreen(uiobj)
 				uiobj.width = newx
-
+				continue
 		elif ch == curses.KEY_DOWN:
 			if uiobj.commandpointer == -2:
 				uiobj.inputwin.drawinput(" ",uiobj.width-2)
