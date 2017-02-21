@@ -33,7 +33,7 @@ class InterfaceObject(object):
 		self.commandpointer = -2
 
 class CursesWindow(object):
-	def __init__(self,uiobj,height,width,loc_y,loc_x,minwidth,box=True,fixedwidth=False,keeplog=False,loglength=0,showcursor=False):
+	def __init__(self,uiobj,height,width,loc_y,loc_x,minheight,minwidth,box=True,fixedwidth=False,keeplog=False,loglength=0,showcursor=False):
 		self.uiobj = uiobj
 		self.window = curses.newwin(height,width,loc_y,loc_x)
 		self.height = height
@@ -42,6 +42,7 @@ class CursesWindow(object):
 		self.loc_x = loc_x
 		self.minwidth = minwidth
 		self.fixedwidth = fixedwidth
+		self.minheight = minheight
 		self.box = box
 		self.scrollback = []
 		self.scrollbacknosplit = []
@@ -121,14 +122,16 @@ class CursesWindow(object):
 			bufferlen = self.height-2
 		else:
 			bufferlen = self.height
-
-		if len(self.scrollback) < bufferlen:
-			for line in self.scrollback:
+		if len(self.scrollbacknosplit) == 0:
+			return
+		self.scrollback = []
+		if len(self.scrollbacknosplit) < bufferlen:
+			for line in self.scrollbacknosplit:
 				self.window.write(line)
 			self.refresh()
 			return
-		if len(self.scrollback) >= bufferlen:
-			for line in self.scrollback[-bufferlen:]:
+		if len(self.scrollbacknosplit) >= bufferlen:
+			for line in self.scrollbacknosplit[-bufferlen:]:
 				self.window.write(line)
 			self.refresh()
 			return
@@ -179,9 +182,9 @@ def initWindows(uiobj):
 	curses.curs_set(1)
 
 	height,width= uiobj.screen.getmaxyx()
-	uiobj.mainwindow = CursesWindow(uiobj,height-3,width-25,0,0,35,keeplog=True,loglength=1000)
-	uiobj.sidebar = CursesWindow(uiobj,height-3,width-uiobj.mainwindow.width,0,uiobj.mainwindow.width,25)
-	uiobj.inputwin = CursesWindow(uiobj,3,width,uiobj.mainwindow.height,0,3,showcursor=True)
+	uiobj.mainwindow = CursesWindow(uiobj,height-3,width-25,0,0,15,35,keeplog=True,loglength=1000)
+	uiobj.sidebar = CursesWindow(uiobj,height-3,width-uiobj.mainwindow.width,0,uiobj.mainwindow.width,20,25)
+	uiobj.inputwin = CursesWindow(uiobj,3,width,uiobj.mainwindow.height,0,3,3,showcursor=True)
 
 	refreshscreen(uiobj)
 
@@ -235,11 +238,7 @@ def wordwrap(text,length):
 				return lines
 		else:
 			x += 1
-			if len(linestring) == 0:
-				pass
-			elif len(linestring) >= length:
-				pass
-			elif len(linestring)+1 <= length:
+			if len(linestring)+1 <= length and len(linestring) > 0:
 				linestring = linestring + " "
 				if len(linestring) == length:
 					lines.append(linestring)
